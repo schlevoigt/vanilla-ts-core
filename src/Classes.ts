@@ -363,6 +363,17 @@ export abstract class AElementComponent<T extends (HTMLElementWithChildren | HTM
     }
 
     /** @inheritdoc */
+    public Data(name: string): NullableString {
+        return this._dom.getAttribute("data-" + name.toLowerCase());
+    }
+
+    /** @inheritdoc */
+    public data(name: string, value: NullableString) {
+        value === null ? this._dom.removeAttribute("data-" + name.toLowerCase()) : this._dom.setAttribute("data-" + name.toLowerCase(), value);
+        return this;
+    }
+
+    /** @inheritdoc */
     public get Disabled(): boolean {
         return this._disabled;
     }
@@ -455,8 +466,11 @@ export abstract class AElementComponent<T extends (HTMLElementWithChildren | HTM
     }
 
     /** @inheritdoc */
-    public style(ruleName: CSSRuleNames, value: string): this {
-        this._dom.style.setProperty(ruleName, value);
+    public style(ruleName: CSSRuleNames, value: string, important?: boolean): this {
+        important
+            ? this._dom.style.setProperty(ruleName.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`), value, "important")
+            // @ts-ignore
+            : this._dom.style[ruleName] = value;
         return this;
     }
 
@@ -472,6 +486,22 @@ export abstract class AElementComponent<T extends (HTMLElementWithChildren | HTM
     /** @inheritdoc */
     public title(title: NullableString): this {
         return this.attrib("title", title);
+    }
+
+    /** @inheritdoc */
+    public override onDidUnmount(): void {
+        this._parentDisabled
+            ? this.parentDisabled(false)
+            : undefined;
+        super.onDidUnmount();
+    }
+
+    /** @inheritdoc */
+    public override onBeforeMount(parent: IElementWithChildrenComponent<HTMLElementWithChildren>): void {
+        super.onBeforeMount(parent);
+        parent.Disabled
+            ? this.parentDisabled(true)
+            : undefined;
     }
 
     /** @inheritdoc */
@@ -676,7 +706,7 @@ export abstract class AElementComponent<T extends (HTMLElementWithChildren | HTM
 /** 
  * Valid values for the DOM attribute `contentEditable`.
  */
-export type ContentEditableAttrValues = boolean | "plaintext-only";
+export type ContentEditableAttrValues = boolean | "" | "plaintext-only";
 
 /**
  * Valid values for the DOM attribute `dir`.
@@ -684,9 +714,25 @@ export type ContentEditableAttrValues = boolean | "plaintext-only";
 export type DirAttrValues = "ltr" | "rtl" | "auto";
 
 /**
+ * Valid values for the DOM attribute `enterKeyHint`.
+ */
+export type EnterKeyHintAttrValues = "enter" | "done" | "go" | "next" | "previous" | "search" | "send";
+
+/**
+ * Valid values for the DOM attribute `inputMode`.
+ */
+export type InputModeAttrValues = "none" | "text" | "decimal" | "numeric" | "tel" | "search" | "email" | "url";
+
+/**
  * Valid values for the DOM attribute `popover`.
  */
 export type PopoverAttrValues = "auto" | "manual" | null;
+
+/**
+ * Possible values of the ability of an element to be resized.
+ * @see The note for the corresponding property `Resizable` in class `GlobalDOMAttributes`.
+ */
+export type ResizableValues = "none" | "both" | "horizontal" | "vertical" | "block" | "inline";
 
 /**
  * This class contains various implementations of global DOM attributes that are valid for all DOM
@@ -784,6 +830,27 @@ export abstract class GlobalDOMAttributes<T extends HTMLElement> extends ANodeCo
     }
 
     /**
+     * Get/set `enterKeyHint` attribute value of the component.
+     */
+    public get EnterKeyHint(): EnterKeyHintAttrValues {
+        return <EnterKeyHintAttrValues>this._dom.enterKeyHint;
+    }
+    /** @inheritdoc */
+    public set EnterKeyHint(v: EnterKeyHintAttrValues) {
+        this._dom.enterKeyHint = v;
+    }
+
+    /**
+     * Set `enterKeyHint` attribute value of the component.
+     * @param v The value to be set.
+     * @returns This instance.
+     */
+    public enterKeyHint(v: EnterKeyHintAttrValues): this {
+        this._dom.enterKeyHint = v;
+        return this;
+    }
+
+    /**
      * Get/set inert attribute value of the component.
      */
     public get Inert(): boolean {
@@ -801,6 +868,27 @@ export abstract class GlobalDOMAttributes<T extends HTMLElement> extends ANodeCo
      */
     public inert(v: boolean): this {
         this._dom.inert = v;
+        return this;
+    }
+
+    /**
+     * Get/set `inputMode` attribute value of the component.
+     */
+    public get InputMode(): InputModeAttrValues {
+        return <InputModeAttrValues>this._dom.inputMode;
+    }
+    /** @inheritdoc */
+    public set InputMode(v: InputModeAttrValues) {
+        this._dom.inputMode = v;
+    }
+
+    /**
+     * Set `inputMode` attribute value of the component.
+     * @param v The value to be set.
+     * @returns This instance.
+     */
+    public inputMode(v: InputModeAttrValues): this {
+        this._dom.inputMode = v;
         return this;
     }
 
@@ -864,6 +952,39 @@ export abstract class GlobalDOMAttributes<T extends HTMLElement> extends ANodeCo
      */
     public popover(v: PopoverAttrValues): this {
         (<PopoverAttrValues>this._dom.popover) = v;
+        return this;
+    }
+
+    /**
+     * Get/set the ability to be resized of the component.\
+     * __Note:__ _This is not a DOM attribute property!_ Instead it is a CSS property that is
+     * available on almost all HTML elements so it is made available here as a pseudo DOM property
+     * just for convenience. Please also note the requirements explained in the `@see` comment.
+     * @see https://developer.mozilla.org/en-US/docs/Web/CSS/resize
+     */
+    public get Resizable(): ResizableValues {
+        return <ResizableValues>this.DOM.style.resize;
+    }
+    /** @inheritdoc */
+    public set Resizable(v: ResizableValues) {
+        this.resizable(v);
+    }
+
+    /**
+     * Set the ability to be resized of the component.\
+     * __Note:__ _This is not a DOM attribute property!_ Instead it is a CSS property that is
+     * available on almost all HTML elements so it is made available here as a pseudo DOM property
+     * just for convenience. Please also note the requirements explained in the `@see` comment.
+     * @param v The value to be set.
+     * @returns This instance.
+     * @see https://developer.mozilla.org/en-US/docs/Web/CSS/resize
+     */
+    public resizable(v: ResizableValues): this {
+        if (v === "none") {
+            this._dom.style.removeProperty("resize");
+        } else {
+            this._dom.style.resize = v;
+        }
         return this;
     }
 

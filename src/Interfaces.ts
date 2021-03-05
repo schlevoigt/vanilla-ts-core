@@ -395,30 +395,46 @@ export interface INodeComponent<T> extends IComponent {
 
     /**
      * Called before removing this component from the `Children` of another component.
-     * Implementations can/should use the `Connected` property in `onBeforeUnmount` to avoid doing
-     * things that are not feasible for non-connected nodes.
+     * 
+     * Notes:
+     * - If this function is overwritten in subclasses, `super.onBeforeUnmount(parent)` must be
+     *   called first!
+     * - Implementations can/should use the `Connected` property in `onBeforeUnmount()` to avoid
+     *   doing things that are not feasible for non-connected nodes/trees/sub-trees.
      */
     onBeforeUnmount(): void;
 
     /**
      * Called after this component has been removed from the `Children` of another component.
-     * Implementations can/should use the `Connected` property in `onBeforeUnmount` to avoid doing
-     * things that are not feasible for non-connected nodes.\
-     * ___Note:___ When overriding this method in subclasses `super.onDidUnmount()` _must_ always be
-     * called  at the end, otherwise functions and properties depending on `Index` won't work!!!
+     * 
+     * Notes:
+     * - If this function is overwritten in subclasses, `super.onDidUnmount(parent)` must be called
+     *   last!
+     * - Implementations can/should use the `Connected` property in `onDidUnmount()` to avoid doing
+     *   things that are not feasible for non-connected nodes/trees/sub-trees.
      */
     onDidUnmount(): void;
 
     /**
      * Called before adding this component to the `Children` of another component.
+     * 
+     * Notes:
+     * - If this function is overwritten in subclasses, `super.onBeforeMount(parent)` must be called
+     *   first!
+     * - Implementations can/should use the `Connected` property in `onBeforeMount()` to avoid doing
+     *   things that are not feasible for non-connected nodes/trees/sub-trees.
      * @param parent The parent component or fragment to which this component will be added.
      */
     onBeforeMount(parent: IElementWithChildrenComponent<HTMLElementWithChildren>): void;
 
     /**
-     * Called after this component has been added to the `Children` of another component.\
-     * ___Note:___ When overriding this method in subclasses `super.onDidMount()` _must_ always be
-     * called at the end, otherwise functions and properties depending on `Index` won't work!!!
+     * Called after this component has been added to the `Children` of another component.
+     * 
+     * _Notes:
+     * - If this function is overwritten in subclasses, `super.onDidMount(parent)` must be called
+     *   last!
+     * - Implementations can/should use the `Connected` property in `onDidMount()` to avoid doing
+     *   things that are not feasible for non-connected nodes/trees/sub-trees.
      * @param parent The parent component or fragment to which this component has been added.
      */
     onDidMount(parent: IElementWithChildrenComponent<HTMLElementWithChildren>): void;
@@ -568,6 +584,33 @@ export interface IElementComponent<T extends HTMLElement, EventMap extends HTMLE
     hasAttrib(name: string): boolean;
 
     /**
+     * Get the value of a `data-*` attribute of the underlying HTML element.
+     * @param name The name of the `data-*` attribute. `name` is the part that comes after the
+     * prefix `data-` of the attributes name so calling `Data("id")` will return the value of an
+     * attribute with the name `data-id`. `name` will always be converted to lowercase before
+     * getting the attribute value so calling `Data("Id")` yields the same result as `Data("id")`.
+     * @returns The value of an attribute with the name `data-<lowercase-name>` or `null` if no
+     * attribute with this name exists on the underlying HTML element.
+     * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/data-*
+     */
+    Data(name: string): NullableString;
+
+    /**
+     * Sets the value of a `data-*` attribute of the underlying HTML element or removes the
+     * attribute.
+     * @param name The name of the `data-*` attribute. `name` is the part that comes after the
+     * prefix `data-` of the attributes name so calling `data("id", "123")` will set the attribute
+     * `data-id` to the value `123`. `name` will always be converted to lowercase before setting the
+     * attribute value so calling `data("Id", "123")` yields the same result as `data("id", "123")`.
+     * @param value The value to be set for the attribute. If `value` is `null`, the attribute will
+     * be removed from the underlying HTML element. If `value` is an empty string a 'boolean'
+     * attribute with the implicit value `true` is created.
+     * @returns This instance.
+     * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/data-*
+     */
+    data(name: string, value: NullableString): this;
+
+    /**
      * Getter/setter for the appearance and behavior of a component in relation to an
      * activated/deactivated state.
      * 
@@ -651,10 +694,11 @@ export interface IElementComponent<T extends HTMLElement, EventMap extends HTMLE
 
     /**
      * Set style rule value on the underlying HTML element.
-     * @param ruleName The CSS style rule name.
+     * @param ruleName The CSS style rule name (camelCase name e.g. `backgroundColor`).
      * @param value The style value to be set.
+     * @param important If true, the style priority will be set to `!important`.
      */
-    style(ruleName: CSSRuleNames, value: string): this;
+    style(ruleName: CSSRuleNames, value: string, important?: boolean): this;
 
     /**
      * Get/set title attribute of the underlying HTML element. Setting Title to `null` will remove
