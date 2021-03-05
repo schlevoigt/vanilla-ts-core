@@ -421,7 +421,7 @@ export interface IChildren {
     /**
      * Remove child components from this the component. Also removes the corresponding Nodes/HTML
      * elements from the DOM node of this component. If the length of `components`is `0`, _all_
-     * components are removed. Removed components must _not_ be disposed.
+     * components are removed. Removed components must _not_ be disposed of.
      * @param components The components to remove. Any element of `components` that isn't a child of
      * this instance is ignored. 
      * @returns This instance.
@@ -471,13 +471,13 @@ export interface IChildren {
 
     /**
      * Removes _all_ child components from this component. Also removes the corresponding Nodes/HTML
-     * elements from their parent HTML elements. The removed components _must_ also be disposed. In
-     * almost all cases the complete component must be considered largely unusable after this
+     * elements from their parent HTML elements. The removed components _must_ also be disposed of.
+     * In almost all cases the complete component must be considered largely unusable after this
      * operation.\
      * __Important note:__ `clear()` is not only meant to handle its own children but any component
      * that may exist besides the children collection! If, for example, the parent component has a
      * separate/additional component tree besides the children collection, `clear()` must also
-     * remove and dispose every component of this separate/additional tree!
+     * remove and dispose of every component of this separate/additional tree!
      * @returns This instance.
      */
     clear(): this;
@@ -1061,8 +1061,8 @@ export interface IElementWithChildrenComponent<T extends HTMLElementWithChildren
      * primarly intended to be used with components like `Span`, `P` or similar.
      * 
      * __Notes:__
-     * - Setting phrasing content must remove _and dispose(!)_ all current children of the component
-     *   and append the new phrasing content.
+     * - Setting phrasing content must remove _and dispose of (!)_ all current children of the
+     *   component and append the new phrasing content.
      * - A getter must not be implemented because the type of `Phrase` is `Phrase | Phrase[]`, but
      *   some components also allow adding flow content (e.g. `<div>`) and in such cases
      *   `Phrase | Phrase[]` would not fit as a return type!
@@ -1098,8 +1098,8 @@ export interface IElementWithChildrenComponent<T extends HTMLElementWithChildren
      * primarly intended to be used with components like `Span`, `P` or similar.
      * 
      * __Notes:__
-     * - Setting phrasing content must remove _and dispose(!)_ all current children of the component
-     *   and append the new phrasing content.
+     * - Setting phrasing content must remove _and dispose of(!)_ all current children of the
+     *   component and append the new phrasing content.
      * - If the length of `phrase` is greater than `1` then for any element of `phrase` that is of
      *   type `string`, an instance of a class that implements `INodeComponent<Text>` must be
      *   created with this string, so even pure text elements of `Children` are 'real' components.
@@ -1399,7 +1399,7 @@ export interface IEventBus<EventMap extends Record<keyof EventMap, AnyType>> {
     allEvents(mode: ALL_EVENTS): this;
 
     /**
-     * Disposes the event bus. After that, the bus can no longer be used, calling any of it's
+     * Disposes of the event bus. After that, the bus can no longer be used, calling any of it's
      * functions will result in a `TypeError` due to an undefined object.
      * @returns This instance.
      */

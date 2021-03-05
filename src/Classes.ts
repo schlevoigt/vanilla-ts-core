@@ -363,14 +363,14 @@ export abstract class ANodeComponent<T extends Node, EventMap extends EventMapVo
      *   (only if `super.dispose()` is used correctly), but nevertheless the removal should be done
      *   as early as possible.
      * - A component must not remove itself from its parent within `dispose()` since this may lead
-     *   lead to problems if a component with child components tries to dispose its children.
+     *   lead to problems if a component with child components tries to dispose of its children.
      * - __Important:__ The expected behaviour of a component with child components is that it also
-     *   removes and disposes all its children when calling `dispose()` on it! Normally this doesn't
-     *   have to be implemented for Components that inherit from `AElementComponentWithChildren`
-     *   since the implementation of `dispose()` there already does this. But if a component is
-     *   derived from AElementComponent and builds its own opaque (set or tree of) components,
-     *   `dispose()` _must_ be overridden and it _must_ ensure that all these self-generated
-     *   components are disposed.
+     *   removes and disposes of all its children when calling `dispose()` on it! Normally this
+     *   doesn't have to be implemented for Components that inherit from
+     *   `AElementComponentWithChildren` since the implementation of `dispose()` there already does
+     *   this. But if a component is derived from AElementComponent and builds its own opaque (set
+     *   or tree of) components, `dispose()` _must_ be overridden and it _must_ ensure that all
+     *   these self-generated components are disposed of.
      * @see IDisposable.dispose
      * @see Class `AElementComponentWithInternalUI`.
      */
@@ -1304,7 +1304,7 @@ export abstract class AChildren<T extends HTMLElementWithChildren, EventMap exte
 
     /**
      * The function `IChildren.clear()` requires that _all_ child components must be removed and
-     * disposed. Since the `AChildren` mixin has no knowledge of components outside the child
+     * disposed of. Since the `AChildren` mixin has no knowledge of components outside the child
      * collection, the parent component itself must remove/dispose such components; for this task
      * any component that uses the `AChildren` mixin must implement `clearOwner()`. `clear()` always
      * calls the `clearOwner()` at the end.\
@@ -1360,8 +1360,8 @@ export abstract class AElementComponentWithChildren<T extends HTMLElementWithChi
     /**
      * By default, the overridden implementation of `text()` here prevents blindly 'destroying' the
      * content of this component. Instead it clears the component by using `clear()` (which disposes
-     * all children components!) before setting the new text content. In many cases the correct way
-     * would be to use `remove()`, `extract()` etc., except disposing the children components is
+     * of all children components!) before setting the new text content. In many cases the correct
+     * way would be to use `remove()`, `extract()` etc., except disposing the children components is
      * explicitly desired.
      * @inheritdoc
      */
@@ -1668,7 +1668,7 @@ export abstract class AElementComponentWithInternalUI<UI extends IElementWithChi
 
     /**
      * Removes _all_ child components from the internal component tree/user interface of this
-     * component. The child components are also disposed.\
+     * component. The child components are also disposed of.\
      * __Note:__ This implementationof `clear()` will be replaced if `AChildren` is used as a mxin
      * for classes inheriting from `AElementComponentWithInternalUI`, so the code here only calls
      * `this.clearOwner()` for clearing the inner tree (`this.ui`). The `clear()`function of
