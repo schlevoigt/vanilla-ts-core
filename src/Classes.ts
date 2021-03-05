@@ -1432,11 +1432,13 @@ export abstract class AElementComponentWithChildren<T extends HTMLElementWithChi
 
     /**
      * Default implementation. For classes simply extending `AElementComponentWithChildren` there is
-     * nothing to do.
+     * almost nothing to do except for removing DOM child nodes which have been left over (usually
+     * pure text nodes form `Phrase/phrase()`).
      * @see `AChildren.clearOwner()`.
      * @returns This instance.
      */
     public clearOwner(): this {
+        this._dom.replaceChildren();
         return this;
     }
 
