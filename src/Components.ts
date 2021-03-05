@@ -66,7 +66,7 @@ export class ElementComponentWithChildren<T extends HTMLElementWithChildren, Eve
             this._dom = document.createElement(this._tagName) as T;
         }
         // Set target DOM for the `IChildren` mixin from `AElementComponentWithChildren`!!
-        this.setChildrenDOMTarget(this._dom);
+        this.setChildrenDOMTarget();
     }
 }
 
@@ -102,7 +102,7 @@ export class WrappedDOMElementComponentWithChildren<EventMap extends EventMapVoi
         super();
         this._dom = target;
         // Set target DOM for the `IChildren` mixin from `AElementComponentWithChildren`!!
-        this.setChildrenDOMTarget(this._dom);
+        this.setChildrenDOMTarget();
     }
 }
 

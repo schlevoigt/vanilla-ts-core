@@ -318,7 +318,12 @@ export interface IGlobalDOMAttributes {
 }
 
 /**
- * Interface to be implemented by classes that allow adding/removing child components.
+ * Interface that must be implemented by classes that enable the addition/removal of child
+ * components. It is generally assumed that the DOM node of each child component is attached to or
+ * removed from the outermost DOM element of the parent component, but this is not mandatory. It is
+ * perfectly possible that child components are mounted anywhere in the component tree of the parent
+ * component.
+ * @see The comment for `clear()` on how this affects the implementation of this function.
  */
 export interface IChildren {
     /**
@@ -465,10 +470,14 @@ export interface IChildren {
     moveToAt(target: IChildren, at: number | INodeComponent<Node>, ...components: INodeComponent<Node>[]): this;
 
     /**
-     * Removes _all_ child components from this the component. Also removes the corresponding
-     * Nodes/HTML elements from their parent HTML elements. The removed components _must_ also be
-     * disposed. In many cases the component must be considered largely unusable after this
-     * operation.
+     * Removes _all_ child components from this component. Also removes the corresponding Nodes/HTML
+     * elements from their parent HTML elements. The removed components _must_ also be disposed. In
+     * almost all cases the complete component must be considered largely unusable after this
+     * operation.\
+     * __Important note:__ `clear()` is not only meant to handle its own children but any component
+     * that may exist besides the children collection! If, for example, the parent component has a
+     * separate/additional component tree besides the children collection, `clear()` must also
+     * remove and dispose every component of this separate/additional tree!
      * @returns This instance.
      */
     clear(): this;
@@ -698,7 +707,7 @@ export interface INodeComponent<T extends Node, EventMap extends EventMapVoid = 
     /**
      * Called after this component has been added to the `Children` of another component.
      * 
-     * _Notes:
+     * __Notes:__
      * - If this function is overwritten in subclasses, `super.onDidMount(parent)` must be called
      *   last!
      * - Implementations can/should use the `Connected` property in `onDidMount()` to avoid doing
@@ -1179,7 +1188,8 @@ export interface IFragment extends IComponent, IDisposable {
     /**
      * Get and remove all children of this fragment. As a result the fragment no longer holds child
      * components.
-     * @returns An object with all child components of the fragment and the HTML document fragment.
+     * @returns An object that contains an array with all child components of the fragment and a
+     * pure HTML document fragment that contains the DOM elements of all child components.
      */
     clear(): { Fragment: DocumentFragment; Children: INodeComponent<Node>[]; }; // eslint-disable-line jsdoc/require-jsdoc
 }

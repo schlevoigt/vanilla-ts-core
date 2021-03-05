@@ -160,7 +160,7 @@ export type HTMLElementWithReadonly = HTMLInputElement | HTMLTextAreaElement;
 
 /**
  * HTML elements which can have a numeric `width` and/or `height` attribute.\
- * _Note:_ `width` and/or `height` are only valid for the `image` input type (a graphical submit
+ * __Note:__ `width` and/or `height` are only valid for the `image` input type (a graphical submit
  * button).
  */
 export type HTMLElementWithNWidthHeight = HTMLCanvasElement | HTMLImageElement
@@ -174,7 +174,7 @@ export type HTMLElementWithSWidthHeight = HTMLObjectElement | HTMLEmbedElement
 
 /**
  * HTML elements which can have a `src` attribute.
- * _Note:_ `src` is only valid for the `image` input type (a graphical submit button).
+ * __Note:__ `src` is only valid for the `image` input type (a graphical submit button).
  */
 export type HTMLElementWithSrc = HTMLAudioElement | HTMLEmbedElement | HTMLIFrameElement
     | HTMLImageElement | HTMLInputElement | HTMLScriptElement | HTMLSourceElement | HTMLTrackElement
@@ -182,7 +182,7 @@ export type HTMLElementWithSrc = HTMLAudioElement | HTMLEmbedElement | HTMLIFram
 
 /**
  * HTML elements which can have an `alt` attribute.
- * _Note:_ `alt` is only valid for the `image` input type (a graphical submit button).
+ * __Note:__ `alt` is only valid for the `image` input type (a graphical submit button).
  */
 export type HTMLElementWithAlt = HTMLAreaElement | HTMLImageElement | HTMLInputElement;
 

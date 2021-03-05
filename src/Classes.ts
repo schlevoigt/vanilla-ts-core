@@ -221,7 +221,7 @@ export abstract class ANodeComponent<T extends Node, EventMap extends EventMapVo
     }
 
     /** @inheritdoc */
-    public onBeforeMount(_parent: IElementWithChildrenComponent<HTMLElementWithChildren>): void { /**/ }
+    public onBeforeMount(_parent: IElementWithChildrenComponent<HTMLElementWithChildren>): void { /**  */ }
 
     /** @inheritdoc */
     public onDidMount(parent: IElementWithChildrenComponent<HTMLElementWithChildren>): void {
@@ -355,7 +355,7 @@ export abstract class ANodeComponent<T extends Node, EventMap extends EventMapVo
 
     /**
      * Free resources of this component. The normal behavior is that afterwards the component is no
-     * longer functional. _Notes:_
+     * longer functional. __Notes:__
      * - Not calling `super.dispose()` at the end is considered to be an error!
      * - A component should always be removed from its parent component (if any) *before* calling
      *   `dispose()` to prevent unwanted side effects during `dispose()`. Due to the inheritance
@@ -696,6 +696,11 @@ export abstract class AGlobalDOMAttributes<T extends HTMLElement, EventMap exten
  * @see IElementComponent
  */
 export abstract class AElementComponent<T extends (HTMLElementWithChildren | HTMLElementVoid), EventMap extends EventMapVoid = HTMLElementEventMap> extends ANodeComponent<T, EventMap> implements IElementComponent<T, EventMap> { // eslint-disable-line @typescript-eslint/no-unsafe-declaration-merging
+    static {
+        /** Mixin additional global DOM attributes */
+        mixinDOMAttributes(AElementComponent, AGlobalDOMAttributes);
+    }
+
     /** The internal flag holding the disabled state of the element. */
     protected _disabled: boolean = false;
     /** The internal flag holding the parentDisabled state of the element. */
@@ -934,11 +939,6 @@ export abstract class AElementComponent<T extends (HTMLElementWithChildren | HTM
             ? this.parentDisabled(true)
             : undefined;
     }
-
-    static {
-        /** Mixin additional global DOM attributes */
-        mixinDOMAttributes(AElementComponent, AGlobalDOMAttributes);
-    }
 }
 
 /** Augment class definition with the DOM attributes introduced by `mixinDOMAttributes()`. */
@@ -1017,14 +1017,15 @@ export abstract class AChildren<T extends HTMLElementWithChildren, EventMap exte
     /**
      * Sets the DOM element on which `AChildren` operates. _Must_ be called by classes that use
      * `AChildren` as a mixin as soon as that DOM element is available.
-     * @param domTarget The DOM element that `AChildren` operates on.
+     * @param domTarget The DOM element that `AChildren` operates on. By default this is `this._dom`
+     * but it can be set any other DOM element the component holds/controls.
      */
-    public setChildrenDOMTarget(domTarget: T): void {
+    public setChildrenDOMTarget(domTarget?: T): void {
         if (this[IChildren_DOM]) {
             throw new Error("IChildren: 'setChildrenDOMTarget()' can only be called once.");
         }
         this[IChildren_Children] = [];
-        this[IChildren_DOM] = domTarget;
+        this[IChildren_DOM] = domTarget || this._dom;
     }
 
     /** @inheritdoc */
@@ -1035,7 +1036,7 @@ export abstract class AChildren<T extends HTMLElementWithChildren, EventMap exte
     /** @inheritdoc */
     public get ElementChildren(): IIsElementComponent[] {
         return this[IChildren_Children].filter(
-            child => child.ComponentType === ComponentType.ELEMENT || child.ComponentType === ComponentType.ELEMENT_WITH_CHILDREN
+            child => child.ComponentType === ComponentType.ELEMENT_WITH_CHILDREN || child.ComponentType === ComponentType.ELEMENT
         ) as IIsElementComponent[];
     }
 
@@ -1301,6 +1302,17 @@ export abstract class AChildren<T extends HTMLElementWithChildren, EventMap exte
         return this;
     }
 
+    /**
+     * The function `IChildren.clear()` requires that _all_ child components must be removed and
+     * disposed. Since the `AChildren` mixin has no knowledge of components outside the child
+     * collection, the parent component itself must remove/dispose such components; for this task
+     * any component that uses the `AChildren` mixin must implement `clearOwner()`. `clear()` always
+     * calls the `clearOwner()` at the end.\
+     * __Note__: `clearOwner()` _must never be called manually_!
+     * @returns This instance.
+     */
+    public abstract clearOwner(): this;
+
     /** @inheritdoc */
     public clear(): this {
         for (const component of this[IChildren_Children]) {
@@ -1313,9 +1325,8 @@ export abstract class AChildren<T extends HTMLElementWithChildren, EventMap exte
             component.onDidUnmount();
             component.dispose();
         }
-        // Remove remaining DOM only nodes.
-        this[IChildren_DOM].replaceChildren();
-        return this;
+        // Also clear components possibly existing besides the children collection.
+        return this.clearOwner();
     }
 }
 // #endregion AChildren
@@ -1332,14 +1343,15 @@ export abstract class AElementComponentWithChildren<T extends HTMLElementWithChi
     static #DOMTextNode: Constructor<INodeComponent<Text>>;
 
     static {
-        /* eslint-disable jsdoc/require-jsdoc */
-        AElementComponentWithChildren.#DOMTextNode = class DOMTextNode_ extends ANodeComponent<Text> {
-            constructor(text: string) {
+        AElementComponentWithChildren.#DOMTextNode = class DOMTextNode_ extends ANodeComponent<Text> { // eslint-disable-line jsdoc/require-jsdoc
+            constructor(text: string) { // eslint-disable-line jsdoc/require-jsdoc
                 super();
                 this._dom = document.createTextNode(text);
             }
         };
-        /* eslint-enable */
+
+        /** Mixin the IChildren implementation (which has to target `this._dom`). */
+        mixin(false, AElementComponentWithChildren, AChildren);
     }
 
     /** @inheritdoc */
@@ -1372,7 +1384,7 @@ export abstract class AElementComponentWithChildren<T extends HTMLElementWithChi
             }
             /** Propagate the new `Disabled` state to all children. */
             for (const child of this.Children) {
-                if (child.ComponentType === ComponentType.ELEMENT || child.ComponentType === ComponentType.ELEMENT_WITH_CHILDREN) {
+                if (child.ComponentType === ComponentType.ELEMENT_WITH_CHILDREN || child.ComponentType === ComponentType.ELEMENT) {
                     (<IIsElementComponent>child).parentDisabled(this._disabled);
                 }
             }
@@ -1394,7 +1406,7 @@ export abstract class AElementComponentWithChildren<T extends HTMLElementWithChi
             }
             /** Otherwise propagate the new `Disabled` state to all children. */
             for (const child of this.Children) {
-                if (child.ComponentType === ComponentType.ELEMENT || child.ComponentType === ComponentType.ELEMENT_WITH_CHILDREN) {
+                if (child.ComponentType === ComponentType.ELEMENT_WITH_CHILDREN || child.ComponentType === ComponentType.ELEMENT) {
                     (<IIsElementComponent>child).parentDisabled(this._parentDisabled);
                 }
             }
@@ -1418,20 +1430,24 @@ export abstract class AElementComponentWithChildren<T extends HTMLElementWithChi
         return this;
     }
 
+    /**
+     * Default implementation. For classes simply extending `AElementComponentWithChildren` there is
+     * nothing to do.
+     * @see `AChildren.clearOwner()`.
+     * @returns This instance.
+     */
+    public clearOwner(): this {
+        return this;
+    }
+
     /** @inheritdoc */
     public override dispose(): void {
         this.clear();
         super.dispose();
     }
-
-    static {
-        /** Mixin the IChildren implementation (which has to target `this._dom`). */
-        mixin(false, AElementComponentWithChildren, AChildren);
-    }
 }
 
 /** Augment class definition with `IChildren/AChildren` (see `static`). */
-// export interface AElementComponentWithChildren<T extends HTMLElementWithChildren, EventMap extends VoidEventMap = HTMLElementEventMap> extends AElementComponent<T, EventMap>, AChildren<T> { }
 export interface AElementComponentWithChildren<T extends HTMLElementWithChildren, EventMap extends EventMapVoid = HTMLElementEventMap> extends AChildren<T, EventMap> { }
 
 /**
@@ -1517,8 +1533,21 @@ export abstract class AElementComponentWithInternalUI<UI extends IElementWithChi
             }
             /** Propagate the new `Disabled` state to all children of `this.ui`. */
             for (const child of this.ui.Children) {
-                if (child.ComponentType === ComponentType.ELEMENT || child.ComponentType === ComponentType.ELEMENT_WITH_CHILDREN) {
+                if (child.ComponentType === ComponentType.ELEMENT_WITH_CHILDREN || child.ComponentType === ComponentType.ELEMENT) {
                     (<IIsElementComponent>child).parentDisabled(this._disabled);
+                }
+            }
+            /**
+             * Additionally, if this component has an `AChildren` mixin also propagate the new
+             * `Disabled` state to all children of the mixin. In such cases `this.ui` (or another
+             * component) holds the _DOM elements_ of the children but the children _components_
+             * themselves are held/managed by `AChildren` separately.
+             */
+            if (Object.hasOwn(this, IChildren_DOM)) {
+                for (const child of (<IChildren><unknown>this).Children) {
+                    if (child.ComponentType === ComponentType.ELEMENT_WITH_CHILDREN || child.ComponentType === ComponentType.ELEMENT) {
+                        (<IIsElementComponent>child).parentDisabled(this._disabled);
+                    }
                 }
             }
         }
@@ -1530,17 +1559,30 @@ export abstract class AElementComponentWithInternalUI<UI extends IElementWithChi
         if (disabled !== this._parentDisabled) {
             super.parentDisabled(disabled);
             /**
-             * If `Disabled` is `true`, the state `ParentDisabled` already has been propagated to all
-             * children so they are ignored. This maintains the correct `Disabled`/`ParentDisabled`
-             * state of sub-trees at any depth.
+             * If `Disabled` is `true`, the state `ParentDisabled` already has been propagated to
+             * all children so they are ignored. This maintains the correct `Disabled`/
+             * `ParentDisabled` state of sub-trees at any depth.
              */
             if (this._disabled) {
                 return this;
             }
             /** Otherwise propagate the new `Disabled` state to all children of `this.ui`. */
             for (const child of this.ui.Children) {
-                if (child.ComponentType === ComponentType.ELEMENT || child.ComponentType === ComponentType.ELEMENT_WITH_CHILDREN) {
+                if (child.ComponentType === ComponentType.ELEMENT_WITH_CHILDREN || child.ComponentType === ComponentType.ELEMENT) {
                     (<IIsElementComponent>child).parentDisabled(this._parentDisabled);
+                }
+            }
+            /**
+             * Additionally, if this component has an `AChildren` mixin also propagate the new
+             * `Disabled` state to all children of the mixin. In such cases `this.ui` (or another
+             * component) holds the _DOM elements_ of the children but the children _components_
+             * themselves are held/managed by `AChildren` separately.
+             */
+            if (Object.hasOwn(this, IChildren_DOM)) {
+                for (const child of (<IChildren><unknown>this).Children) {
+                    if (child.ComponentType === ComponentType.ELEMENT_WITH_CHILDREN || child.ComponentType === ComponentType.ELEMENT) {
+                        (<IIsElementComponent>child).parentDisabled(this._parentDisabled);
+                    }
                 }
             }
         }
@@ -1604,14 +1646,13 @@ export abstract class AElementComponentWithInternalUI<UI extends IElementWithChi
     }
 
     /**
-     * Removes _all_ child components from the internal component tree/user interface of this
-     * component. The child components are also disposed.
-     * @see `IChildren.clear()`.
+     * @see `this.clear()`.
+     * @see `AChildren.clearOwner()`.
      * @returns This instance.
      */
-    public clear(): this {
+    public clearOwner(): this {
         if (!this.#initialized) {
-            throw new Error("'dispose()' can only be called once after 'init()'.");
+            throw new Error("'clear()'/'clearOwner()' can only be called once after 'initialize()'.");
         }
         if (this.#mountUI) {
             this.ui.onBeforeUnmount();
@@ -1621,6 +1662,22 @@ export abstract class AElementComponentWithInternalUI<UI extends IElementWithChi
             this.ui.clear();
         }
         return this;
+    }
+
+    /**
+     * Removes _all_ child components from the internal component tree/user interface of this
+     * component. The child components are also disposed.\
+     * __Note:__ This implementationof `clear()` will be replaced if `AChildren` is used as a mxin
+     * for classes inheriting from `AElementComponentWithInternalUI`, so the code here only calls
+     * `this.clearOwner()` for clearing the inner tree (`this.ui`). The `clear()`function of
+     * `AChildren` itself also always calls `this.clearOwner()`, so the intended behavior is
+     * maintained.
+     * @see `IChildren.clear()`.
+     * @see `AChildren.clearOwner()`.
+     * @returns This instance.
+     */
+    public clear(): this {
+        return this.clearOwner();
     }
 
     /** @inheritdoc */
@@ -1662,7 +1719,7 @@ export abstract class AFragmentComponent extends AComponent implements IFragment
     public get ElementChildren(): IIsElementComponent[] {
         return this._children.filter(
             (child) =>
-                child.ComponentType === ComponentType.ELEMENT || child.ComponentType === ComponentType.ELEMENT_WITH_CHILDREN
+                child.ComponentType === ComponentType.ELEMENT_WITH_CHILDREN || child.ComponentType === ComponentType.ELEMENT
         ) as IIsElementComponent[];
     }
 
@@ -1709,7 +1766,7 @@ export abstract class AFragmentComponent extends AComponent implements IFragment
     }
 
     /**
-     * _Note:_ This doesn't destroy/dispose the child components. If references to the child
+     * __Note:__ This doesn't destroy/dispose the child components. If references to the child
      * components are stored elsewhere, they can be reused.
      * @see IDisposable.dispose()
      */
@@ -1820,9 +1877,6 @@ export abstract class ACustomComponentEvent<T extends string, S extends INodeCom
 export class AEventBus<EventMap extends Record<keyof EventMap, AnyType>> implements IEventBus<EventMap> {
     protected static busElementClass: Constructor<INodeComponent<Text>>;
     protected static busRegistry = new Map<string, AEventBus<AnyObject>>();
-    protected bus: INodeComponent<Text, EventMap>;
-    protected name: string;
-    protected wrappedListeners: [(data: AnyType, event: EventBusEvent) => AnyType, (data: AnyType) => AnyType][] = [];
 
     static {
         /**
@@ -1835,6 +1889,10 @@ export class AEventBus<EventMap extends Record<keyof EventMap, AnyType>> impleme
             }
         };
     }
+
+    protected bus: INodeComponent<Text, EventMap>;
+    protected name: string;
+    protected wrappedListeners: [(data: AnyType, event: EventBusEvent) => AnyType, (data: AnyType) => AnyType][] = [];
 
     /**
      * Create a new event bus instance.
