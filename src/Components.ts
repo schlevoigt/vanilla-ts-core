@@ -1,12 +1,12 @@
 import {
-    AComponent,
     AComponentFactory,
     AElementComponentVoid,
     AElementComponentWithChildren,
-    AFragmentComponent,
-    ANodeComponent
+    AFragmentComponent
 } from "./Classes.js";
 import {
+    ComponentType,
+    EventMapVoid,
     IComponent,
     IElementWithChildrenComponent,
     IFragment,
@@ -15,7 +15,6 @@ import {
 } from "./Interfaces.js";
 import {
     AnyType,
-    ComponentType,
     HTMLElementVoid,
     HTMLElementVoidTagName,
     HTMLElementWithChildren,
@@ -24,32 +23,10 @@ import {
 
 
 /**
- * Base implementation for a component without any visual representation.
- * @see AComponent
- */
-export class Component extends AComponent { }
-
-/**
- * Base implementation for a text node component.
- * @see ANodeComponent
- */
-export class TextComponent extends ANodeComponent<Text> {
-    /**
-     * Create instance based on the `Text` interface.
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/Text
-     * @param text The text for the text node.
-     */
-    constructor(text: string) {
-        super();
-        this._dom = document.createTextNode(text);
-    }
-}
-
-/**
  * Base implementation for all components, *that do not allow* to add child components.
  * @see AElementComponentVoid
  */
-export class ElementComponentVoid<T extends HTMLElementVoid, EventMap extends HTMLElementEventMap = HTMLElementEventMap> extends AElementComponentVoid<T, EventMap> {
+export class ElementComponentVoid<T extends HTMLElementVoid, EventMap extends EventMapVoid = HTMLElementEventMap> extends AElementComponentVoid<T, EventMap> {
     /**
      * Create instance based on an HTML element type without children.
      * @param _tagName Tag name of the HTML element.
@@ -72,7 +49,7 @@ export class ElementComponentVoid<T extends HTMLElementVoid, EventMap extends HT
  * Base implementation for all components, *that do allow* to add child components.
  * @see AElementComponentWithChildren
  */
-export class ElementComponentWithChildren<T extends HTMLElementWithChildren, EventMap extends HTMLElementEventMap = HTMLElementEventMap> extends AElementComponentWithChildren<T, EventMap> {
+export class ElementComponentWithChildren<T extends HTMLElementWithChildren, EventMap extends EventMapVoid = HTMLElementEventMap> extends AElementComponentWithChildren<T, EventMap> {
     /**
      * Create instance based on an HTML element type with children.
      * @param _tagName Tag name of the HTML element.
@@ -88,6 +65,8 @@ export class ElementComponentWithChildren<T extends HTMLElementWithChildren, Eve
         } else {
             this._dom = document.createElement(this._tagName) as T;
         }
+        // Set target DOM for the `IChildren` mixin from `AElementComponentWithChildren`!!
+        this.setChildrenDOMTarget(this._dom);
     }
 }
 
@@ -95,7 +74,7 @@ export class ElementComponentWithChildren<T extends HTMLElementWithChildren, Eve
  * Simple wrapper helper component for a void DOM element. The component is fully functional but no
  * event handlers of the target element are adopted.
  */
-export class WrappedDOMElementComponentVoid<EventMap extends HTMLElementEventMap = HTMLElementEventMap> extends AElementComponentVoid<HTMLElementVoid, EventMap> {
+export class WrappedDOMElementComponentVoid<EventMap extends EventMapVoid = HTMLElementEventMap> extends AElementComponentVoid<HTMLElementVoid, EventMap> {
     /**
      * Create instance that wraps a target DOM element with a component instance.
      * @param target The DOM element to be wrapped.
@@ -114,7 +93,7 @@ export class WrappedDOMElementComponentVoid<EventMap extends HTMLElementEventMap
  * to an already existing DOM element, for example for building an application inside an arbitrary
  * (empty) div element somewhere in the page.
  */
-export class WrappedDOMElementComponentWithChildren<EventMap extends HTMLElementEventMap = HTMLElementEventMap> extends AElementComponentWithChildren<HTMLElementWithChildren, EventMap> {
+export class WrappedDOMElementComponentWithChildren<EventMap extends EventMapVoid = HTMLElementEventMap> extends AElementComponentWithChildren<HTMLElementWithChildren, EventMap> {
     /**
      * Create an instance that wraps a target DOM element with a component instance.
      * @param target The DOM element to be wrapped.
@@ -122,6 +101,8 @@ export class WrappedDOMElementComponentWithChildren<EventMap extends HTMLElement
     constructor(target: HTMLElementWithChildren) {
         super();
         this._dom = target;
+        // Set target DOM for the `IChildren` mixin from `AElementComponentWithChildren`!!
+        this.setChildrenDOMTarget(this._dom);
     }
 }
 
@@ -145,6 +126,7 @@ export class FragmentComponent extends AFragmentComponent {
  * Base implementation for a component factory. This implementation doesn't do anything in
  * `setupComponent` but it may be useful as the base for custom factories that support a fluent API
  * for creating components. `setupComponent` can be overridden later to set up components.
+ * @see AComponentFactory
  * @example
  * ```typescript
  * class MyFactory extends VTSComponentFactory<IComponent> {
@@ -173,7 +155,7 @@ export class FragmentComponent extends AFragmentComponent {
  * 
  * An alternative version without the declaration of the variable `edtUserName`can look like this:
  * 
- * ```
+ * ```typescript
  * const app = $.div().addClass("app").append(
  *   ...(() => {
  *     const edt = $.labeledTextInput("Username:", "userName", "userName");
@@ -184,7 +166,6 @@ export class FragmentComponent extends AFragmentComponent {
  *   })()
  * );
  * ```
- * @see AComponentFactory
  */
 export class ComponentFactory<T extends IComponent> extends AComponentFactory<T> {
     public setupComponent(component: T, _data?: unknown): T { // eslint-disable-line jsdoc/require-jsdoc
@@ -283,7 +264,7 @@ export class CSSClassNameFactory extends ComponentFactory<IComponent> {
  * Although calling `super.setupComponent` in this implementation currently does nothing it's
  * nevertheless recommended.
  */
-export abstract class VTSApplication<EventMap extends HTMLElementEventMap = HTMLElementEventMap> extends ComponentFactory<IComponent> {
+export abstract class VTSApplication<EventMap extends EventMapVoid = HTMLElementEventMap> extends ComponentFactory<IComponent> {
     /**
      * The root DOM container element for all components to be added.
      */
@@ -330,9 +311,6 @@ export abstract class VTSApplication<EventMap extends HTMLElementEventMap = HTML
 
     /**
      * Append child components. Also available on `Root`, re-exported here for convenience.
-     * - Append the components as child elements to *this* app and
-     * - also append the underlying HTML elements of each component to the underlying HTML element
-     *   of *this* app.
      * @param components The components to append.
      * @returns This instance.
      */
@@ -342,11 +320,8 @@ export abstract class VTSApplication<EventMap extends HTMLElementEventMap = HTML
     }
 
     /**
-     * Append the children (components) of a fragment to this component.  Also available on `Root`,
+     * Append the children (components) of a fragment to this component. Also available on `Root`,
      * re-exported here for convenience.
-     * - Append the components as child elements to this component.
-     * - Also append the underlying Node/HTML Element of each component to the underlying HTML
-     *   element of *this* app.
      * @param fragment The fragment with components to append.
      * @returns This instance.
      */
@@ -358,9 +333,6 @@ export abstract class VTSApplication<EventMap extends HTMLElementEventMap = HTML
     /**
      * Insert child components at a numeric index or the index of a component reference of this
      * app. Also available on `Root`, re-exported here for convenience.
-     * - Insert the components as child elements to this app and
-     * - also insert the underlying Node/HTML Element of each component to the underlying HTML
-     *   element of this app.
      * @param at The target index in the collection of `Children`. If `at` is lower than 0 it is
      * considered to be 0. If `at` is greater than `Children.length` the given components will be
      * appended. If `at` is a component the components will be inserted at the position of `at`
@@ -375,8 +347,8 @@ export abstract class VTSApplication<EventMap extends HTMLElementEventMap = HTML
     }
 
     /**
-     * Remove child components from this the app. Also removes the corresponding HTML elements
-     * from their parent HTML elements. Also available on `Root`, re-exported here for convenience.
+     * Remove child components from this the app. Also available on `Root`, re-exported here for
+     * convenience.
      * @param components The components to remove.
      * @returns This instance.
      */
@@ -386,11 +358,9 @@ export abstract class VTSApplication<EventMap extends HTMLElementEventMap = HTML
     }
 
     /**
-     * Extract child components from this the app. Also removes the corresponding Nodes/HTML
-     * elements from the DOM node of this app. The removed components will be pushed to the
-     * array given by `to`. If the length of `...components` is `0` *all* children of this component
-     * will be extracted and pushed to `to`. Also available on `Root`, re-exported here for
-     * convenience.
+     * Extract child components from this the app. If the length of `...components` is `0` *all*
+     * children of this component will be extracted and pushed to `to`. Also available on `Root`,
+     * re-exported here for convenience.
      * @param to An array to which the removed components will be pushed.
      * @param components The components to be extracted.
      * @returns This instance.
@@ -409,7 +379,7 @@ export abstract class VTSApplication<EventMap extends HTMLElementEventMap = HTML
  * of course also be used as a base class for an app class that does more than just provide simple
  * access to component factory functions.
  * @example
- * ```
+ * ```typescript
  * const MyAppClass = mixinComponentFactories(
  *     VTS_App,
  *     DivFactory,
@@ -430,7 +400,7 @@ export abstract class VTSApplication<EventMap extends HTMLElementEventMap = HTML
  * )
  * ```
  */
-export class VTS_App<EventMap extends HTMLElementEventMap = HTMLElementEventMap> extends VTSApplication<EventMap> {
+export class VTS_App<EventMap extends EventMapVoid = HTMLElementEventMap> extends VTSApplication<EventMap> {
     #cf: ComponentFactory<IComponent>;
     #cssPrefix: string;
     #recursive: boolean;

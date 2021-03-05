@@ -273,7 +273,7 @@ export abstract class MinMaxLengthAttr<T extends HTMLInputElement | HTMLTextArea
             this._dom.minLength = -1;
             return this;
         }
-        const maxLength = this.MaxLength;
+        const maxLength = this._dom.maxLength;
         // maxLength not set, no further check.
         if (maxLength === -1) {
             this._dom.minLength = v;

@@ -1,30 +1,41 @@
 import {
     AnyType,
-    ComponentType,
+    ContentEditableAttrValues,
     CSSRuleNames,
+    DirAttrValues,
+    EnterKeyHintAttrValues,
     HTMLElementVoid,
     HTMLElementWithChildren,
+    HTMLElementWithPhrasingContent,
+    InputModeAttrValues,
     NullableBoolean,
     NullableNumber,
-    NullableString
+    NullableString,
+    PopoverAttrValues,
+    ResizableValues
 } from "./Types.js";
 
+
+/**
+ * An event map that initillay has no members.
+ */
+export interface EventMapVoid { }
 
 /**
  * An event listener entry. This is the type which is used to add/remove event listeners on a
  * component by calling `on(...)`/`off(...)`. This is the component which is referred to in the
  * documentation of the `target` member.
  */
-export interface IEventListener {
+export interface IEventListener<EventMap extends EventMapVoid = HTMLElementEventMap> {
     /** The event type e.g. "click", "pointerdown", "my-event" */
-    Type: keyof HTMLElementEventMap;//string;//keyof EventMap;
+    Type: keyof EventMap;
     /** The event callback function. */
-    Listener(this: HTMLElement, ev: HTMLElementEventMap[keyof HTMLElementEventMap]): AnyType;
+    Listener(this: Node, ev: EventMap[keyof EventMap]): AnyType;
     /**
      * Event listener options.
      * @see https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener
      */
-    Options?: boolean | AddEventListenerOptions | undefined;
+    Options: boolean | AddEventListenerOptions | undefined;
     /**
      * `true`, if listener execution is temporarily suspended, otherwise `false`.
      */
@@ -53,6 +64,22 @@ export enum ALL_EVENTS {
 }
 
 /**
+ * The type of a component.
+ */
+export enum ComponentType {
+    /** Basic component without any visual represantation. */
+    COMPONENT = 1,
+    /** Pure (text) node component. */
+    NODE = 2,
+    /** Component based on a void HTML element (`HTMLElementVoid`). */
+    ELEMENT = 3,
+    /** Component based on an HTML element with children (`HTMLElementWithChildren`). */
+    ELEMENT_WITH_CHILDREN = 4,
+    /** Fragment component. */
+    FRAGMENT = 5,
+}
+
+/**
  * Interface indicating that something supports freeing resources. Used, for example, by class
  * instances that will or can no longer be used.
  */
@@ -66,6 +93,228 @@ export interface IDisposable {
      * Free resources/clean up. Sets the property `Disposed` to true.
      */
     dispose(): void;
+}
+
+/**
+ * This interface defines various global DOM attributes that are valid for all DOM components/HTML
+ * elements.
+ * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes
+ * @todo Extend with more global DOM attributes.
+ */
+export interface IGlobalDOMAttributes {
+    /**
+     * Get/set `autofocus` attribute value of the component.
+     */
+    Autofocus: boolean;
+
+    /**
+     * Set 'autofocus' attribute value of the component.
+     * @param v The value to be set.
+     * @returns This instance.
+     */
+    autofocus(v: boolean): this;
+
+    /**
+     * Get/set `contentEditable` attribute value of the component. Setting `false` will remove the
+     * attribute.
+     */
+    ContentEditable: ContentEditableAttrValues;
+
+    /**
+     * Set `contentEditable` attribute value of the component.
+     * @param v The value to be set. `false` will remove the attribute.
+     * @returns This instance.
+     */
+    contentEditable(v: ContentEditableAttrValues): this;
+
+    /**
+     * Get/set `class` attribute value of the component. Setting `null` or an empty string will
+     * remove the attribute, getting `null` indicates, that the attribute doesn't exist.
+     */
+    Clazz: NullableString;
+
+    /**
+     * Set `class` attribute value of the component.
+     * @param v The value to be set. `null` or an empty string will remove the attribute.
+     * @returns This instance.
+     */
+    clazz(v: NullableString): this;
+
+    /**
+     * Get/set `dir` attribute value of the component. Setting `null` will remove the attribute,
+     * getting `null` indicates, that the attribute doesn't exist.
+     */
+    Dir: DirAttrValues;
+
+    /**
+     * Set `dir` attribute value of the component.
+     * @param v The value to be set. `null` will remove the attribute.
+     * @returns This instance.
+     */
+    dir(v: DirAttrValues): this;
+
+    /**
+     * Get/set `draggable` attribute value of the component.
+     */
+    Draggable: boolean;
+
+    /**
+     * Set `draggable` attribute value of the component.
+     * @param v The value to be set. `false` will remove the attribute.
+     * @returns This instance.
+     */
+    draggable(v: boolean): this;
+
+    /**
+     * Get/set `enterKeyHint` attribute value of the component. Setting `null` will remove the
+     * attribute, getting `null` indicates, that the attribute doesn't exist.
+     */
+    EnterKeyHint: EnterKeyHintAttrValues;
+
+    /**
+     * Set `enterKeyHint` attribute value of the component.
+     * @param v The value to be set.
+     * @returns This instance.
+     */
+    enterKeyHint(v: EnterKeyHintAttrValues): this;
+
+    /**
+     * Get/set `id` attribute value of the component. Setting `null` or an empty string will remove
+     * the attribute, getting `null` indicates, that the attribute doesn't exist.
+     */
+    ID: NullableString;
+
+    /**
+     * Set `id` attribute value of the component.
+     * @param v The value to be set. `null` or an empty string will remove the attribute
+     * @returns This instance.
+     */
+    id(v: NullableString): this;
+
+    /**
+     * Get/set inert attribute value of the component.
+     */
+    Inert: boolean;
+
+    /**
+     * Set `inert` attribute value of the component.
+     * @param v The `inert` value to be set.
+     * @returns This instance.
+     */
+    inert(v: boolean): this;
+
+    /**
+     * Get/set `inputMode` attribute value of the component. Setting `null` will remove the
+     * attribute, getting `null` indicates, that the attribute doesn't exist.
+     */
+    InputMode: InputModeAttrValues;
+
+    /**
+     * Set `inputMode` attribute value of the component.
+     * @param v The value to be set. `null` will remove the attribute.
+     * @returns This instance.
+     */
+    inputMode(v: InputModeAttrValues): this;
+
+    /**
+     * Get/set `lang` attribute value of the component. Setting `null` or an empty string will
+     * remove the attribute, getting `null` indicates, that the attribute doesn't exist.
+     */
+    Lang: NullableString;
+
+    /**
+     * Set `lang` attribute value of the component.
+     * @param v The value to be set. `null` or an empty string will remove the attribute.
+     * @returns This instance.
+     */
+    lang(v: NullableString): this;
+
+    /**
+     * Get/set `nonce` attribute value of the component.
+     */
+    Nonce: string | undefined;
+
+    /**
+     * Set `nonce` attribute value of the component.
+     * @param v The value to be set.
+     * @returns This instance.
+     */
+    nonce(v: string | undefined): this;
+
+    /**
+     * Get/set `popover` attribute value of the component.
+     */
+    Popover: PopoverAttrValues;
+
+    /**
+     * Set `popover` attribute value of the component.
+     * @param v The value to be set.
+     * @returns This instance.
+     */
+    popover(v: PopoverAttrValues): this;
+
+    /**
+     * Get/set the ability to be resized of the component.\
+     * __Note:__ _This is not a DOM attribute property!_ Instead it is a CSS property that is
+     * available on almost all HTML elements so it is made available here as a pseudo DOM property
+     * just for convenience. Please also note the requirements explained in the `@see` comment.\
+     * The value `false` means that the CSS `resize` property on the component has no explicit value
+     * set, this is valid for both reading and writing the property, however, the behavior is
+     * equivalent to the value `none`.
+     * @see https://developer.mozilla.org/en-US/docs/Web/CSS/resize
+     */
+    Resizable: ResizableValues;
+
+    /**
+     * Set the ability to be resized of the component.\
+     * __Note:__ _This is not a DOM attribute property!_ Instead it is a CSS property that is
+     * available on almost all HTML elements so it is made available here as a pseudo DOM property
+     * just for convenience. Please also note the requirements explained in the `@see` comment.
+     * @param v The value to be set. The value `false` means that the CSS `resize` property on the
+     * component has no explicit value set, this is valid for both reading and writing the property,
+     * however, the behavior is equivalent to the value `none`.
+     * @returns This instance.
+     * @see https://developer.mozilla.org/en-US/docs/Web/CSS/resize
+     */
+    resizable(v: ResizableValues): this;
+
+    /**
+     * Get/set `tabIndex` attribute value of the component.
+     */
+    TabIndex: number;
+
+    /**
+     * Set `tabIndex` attribute value of the component.
+     * @param v The value to be set. `null` is equivalent to `0` but the attribute will also be
+     * removed, reading the attribute will always return a number.
+     * @returns This instance.
+     */
+    tabIndex(v: NullableNumber): this;
+
+    /**
+     * Get/set `title` attribute value of the component. Setting `null` or an empty string will
+     * remove the attribute, getting `null` indicates, that the attribute doesn't exist.
+     */
+    Title: NullableString;
+
+    /**
+     * Set `title` attribute value of the component.
+     * @param title The value to be set. `null` or an empty string will remove the attribute.
+     * @returns This instance.
+     */
+    title(title: NullableString): this;
+
+    /**
+     * Get/set `translate` attribute value of the component.
+     */
+    Translate: boolean;
+
+    /**
+     * Set `translate` attribute value of the component.
+     * @param v The value to be set. `false` will remove the attribute.
+     * @returns This instance.
+     */
+    translate(v: boolean): this;
 }
 
 /**
@@ -226,6 +475,20 @@ export interface IChildren {
 }
 
 /**
+ * Type of phrase content for elements with phrasing content (single phrase like one string or a
+ * span element (which may contain further phrases)).
+ * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Content_categories#phrasing_content
+ */
+export type Phrase = string | INodeComponent<HTMLElementWithPhrasingContent | Text>;
+
+/**
+ * Type of phrase content for elements with phrasing content (multiple phrases like strings or a
+ * span elements (which may contain further phrases) or any combination of strings and phrases).
+ * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Content_categories#phrasing_content
+ */
+export type Phrases = Array<Phrase>;
+
+/**
  * Base inteface for all components.
  */
 export interface IComponent extends IDisposable {
@@ -288,10 +551,10 @@ export interface IComponent extends IDisposable {
      * function fnc2(this: Div) { console.log("Function with access to 'this':", this.DOM.tagName); }
      * function fnc3(this: Div, param1: string, param2: string) {
      *   console.log(
-     *     "Function with access to 'this' and parameters:",
-     *     this.Children.length,
-     *     param1,
-     *     param2
+     *   "Function with access to 'this' and parameters:",
+     *   this.Children.length,
+     *   param1,
+     *   param2
      *   );
      * }
      * div.exec(() => console.log("Inline arrow function (no access to 'this')"))
@@ -308,7 +571,7 @@ export interface IComponent extends IDisposable {
 /**
  * Base interface for components based on a node or HTML element.
  */
-export interface INodeComponent<T> extends IComponent {
+export interface INodeComponent<T extends Node, EventMap extends EventMapVoid = HTMLElementEventMap> extends IComponent {
     /**
      * The underlying DOM node or HTML element.\
      * __Note:__ Using this property to append/remove other DOM elements _to a component_, e.g.
@@ -326,13 +589,18 @@ export interface INodeComponent<T> extends IComponent {
     /**
      * The next sibling component of this component within the array of the `Children` of `Parent`.
      */
-    readonly Next?: INodeComponent<Node> | undefined;
+    readonly Next: INodeComponent<Node> | undefined;
 
     /**
      * The previous sibling component of this component within the array of the `Children` of
      * `Parent`.
      */
     readonly Previous: INodeComponent<Node> | undefined;
+
+    /**
+     * An array of copies of all currently registered event listeners.
+     */
+    readonly Listeners: IEventListener[];
 
     /**
      * Determines if this component is contained in the component tree of another component (at any
@@ -347,7 +615,7 @@ export interface INodeComponent<T> extends IComponent {
      * @returns `true`, if this component is contained in the component tree of `component` (at any
      * depth), otherwise `false`.
      */
-    isContainedIn(component: INodeComponent<Node>): boolean;
+    isContainedIn(component: IElementWithChildrenComponent<HTMLElementWithChildren>): boolean;
 
     /**
      * Determines if this component contains another component in its component tree (at any
@@ -438,41 +706,107 @@ export interface INodeComponent<T> extends IComponent {
      * @param parent The parent component or fragment to which this component has been added.
      */
     onDidMount(parent: IElementWithChildrenComponent<HTMLElementWithChildren>): void;
+
+    /**
+     * Dispatches an event to all registered listeners. Shorthand for `this._dom.dispatch()`.\
+     * __Note__: This function always returns `this` so even if `event` is cancelable there is no
+     * way to detect, if `event` was canceled. For detecting canceled events use `dispatch()`
+     * instead.
+     * @param event The event to emit/dispatch.
+     * @returns This instance.
+     */
+    emit(event: Event): this;
+
+    /**
+     * Dispatches an event to all registered listeners. Shorthand for `this._dom.dispatch()`.\
+     * __Note__: This function returns the result of `this._dom.dispatch()`. If the result of
+     * dispatching the event is of no interest `emit()` can be used instead.
+     * @param event The event to emit/dispatch.
+     * @returns `false`, if the event was canceled, otherwise `true`.
+     */
+    dispatch(event: Event): boolean;
+
+    /**
+     * Add an event listener to this component. This function must work identical to the
+     * `addEventListener` function. The listener is added to the `DOM` property of `this`.
+     * @see https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener
+     * @param type Event type (click, blur etc.).
+     * @param listener Listener function.
+     * @param options Event listener options.
+     * @returns This instance.
+     */
+    on<K extends keyof EventMap>(type: K, listener: (this: T, ev: EventMap[K]) => AnyType, options?: boolean | AddEventListenerOptions): this;
+
+    /**
+     * Add an event listener to this component that is invoked at most once after being added. This
+     * function must work identical to the regular `addEventListener` function. The listener is
+     * added to the `DOM` property of `this` and automatically removed when invoked.
+     * @see https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener
+     * @param type Event type (click, blur etc.).
+     * @param listener Listener function.
+     * @param options Event listener options. In implementations, if `options` is a boolean value it
+     * must be replaced with `{capture: options, once: true}`, if `options` is an object or
+     * `undefined` or `null`, it must be replaced with `{...options, once: true}`.\
+     * __Note:__ Listeners added with `once` are ignored by `allEvents()`, it is also impossible to
+     * turn off, suspend or resume such listeners.
+     * @returns This instance.
+     */
+    once<K extends keyof EventMap>(type: K, listener: (this: T, ev: EventMap[K]) => AnyType, options?: boolean | AddEventListenerOptions): this;
+
+    /**
+     * Remove an event listener from this component. This function must work identical to the
+     * regular `removeEventListener` function. The listener is removed from the `DOM` property of
+     * `this`.
+     * @see https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/removeEventListener
+     * @param type Event type (click, blur etc.).
+     * @param listener Listener function.
+     * @param options Event listener options.
+     * @returns This instance.
+     */
+    off<K extends keyof EventMap>(type: K, listener: (this: T, ev: EventMap[K]) => AnyType, options?: boolean | AddEventListenerOptions): this;
+
+    /**
+     * Suspends an event listener if it can be found in the internal list of listeners _and_ if it
+     * isn't already suspended. This is different from simply using `off()` and then `on()` again
+     * with the listener because the execution order of installed listeners is retained with using
+     * `suspend()`/`resume()`.
+     * @param type Event type (click, blur etc.).
+     * @param listener Listener function.
+     * @param options Event listener options.
+     * @returns This instance.
+     */
+    suspend<K extends keyof EventMap>(type: K, listener: (this: T, ev: EventMap[K]) => AnyType, options?: boolean | AddEventListenerOptions): this;
+
+    /**
+     * Resumes an event listener if it can be found in the internal list of listeners _and_ if it is
+     * suspended. This is different from simply using `off()` and then `on()` again with the
+     * listener because the execution order of installed listeners is retained with using
+     * `suspend()`/`resume()`.
+     * @param type Event type (click, blur etc.).
+     * @param listener Listener function.
+     * @param options Event listener options.
+     * @returns This instance.
+     */
+    resume<K extends keyof EventMap>(type: K, listener: (this: T, ev: EventMap[K]) => AnyType, options?: boolean | AddEventListenerOptions): this;
+
+    /**
+     * Suspends or resumes the execution of _all currently_ registered regular event listeners on
+     * this component or removes all listeners permanently from this component. `allEvents()` must
+     * ignore listeners added with `once()`. If all listeners are suspended and then an additional
+     * listener is added this listener will be active.
+     * @param mode Can be one of `OFF`, `SUSPEND` or `RESUME`. `SUSPEND` and `RESUME` are used to
+     * suspend or resume the listeners execution. All listeners will be kept on the component.
+     * `OFF` instead will permanently remove alle registered listeners from this component. There
+     * is no way to restore these listeners (except they are held elesewhere and are re-registered
+     * via `on()`).
+     */
+    allEvents(mode: ALL_EVENTS): this;
 }
 
 /**
  * Base interface for HTML element based components.
  */
-export interface IElementComponent<T extends HTMLElement, EventMap extends HTMLElementEventMap = HTMLElementEventMap> extends INodeComponent<T> {
-    /**
-     * Get/set ID attribute of the underlying HTML element. Setting ID to `null` will remove the
-     * `id` attribute from the element.
-     */
-    ID: NullableString;
-
-    /**
-     * Set the ID of the underlying HTML element.
-     * @param id The ID to be set. If `id` is `null`, the `id` attribute will be removed from the
-     * element.
-     * @returns This instance.
-     */
-    id(id: NullableString): this;
-
-    /**
-     * Get/set class attribute of the underlying HTML element. Setting Clazz to `null` will remove
-     * the `class` attribute from the element.
-     */
-    Clazz: NullableString;
-
-    /**
-     * Set the class attribute value on the underlying HTML element. No checks are carried out on
-     * the validity of the attribute value.
-     * @param clazz The class attribute value to be set. If clazz is `null`, the `class` attribute
-     * will be removed from the element.
-     * @returns This instance.
-     */
-    clazz(clazz: NullableString): this;
-
+export interface IElementComponent<T extends HTMLElement, EventMap extends EventMapVoid = HTMLElementEventMap> extends INodeComponent<T, EventMap>, IGlobalDOMAttributes {
     /**
      * Add class name(s) to the class list of the underlying HTML element. All class names are
      * trimmed and if a trimmed class name is an empty string, it will be ignored.
@@ -552,11 +886,12 @@ export interface IElementComponent<T extends HTMLElement, EventMap extends HTMLE
     attrN(name: string): NullableNumber;
 
     /**
-     * Add/set/remove a boolean attribute of the underlying HTML element.
+     * Add/set/remove a 'boolean' attribute of the underlying HTML element.
      * @param name The name of the attribute.
      * @param value The value of the attribute. If value is `null` or `false`, the attribute will be
-     * removed from the element. If `value` is true, the value of the attribute will be set to an
-     * empty string.
+     * removed from the element. If `value` is true, technically the value of the attribute will be
+     * set to an empty string which results in an attribute that shows no `="..."` part in the DOM
+     * inspectors of browsers.
      * @returns This instance.
      */
     attribB(name: string, value: NullableBoolean): this;
@@ -589,8 +924,9 @@ export interface IElementComponent<T extends HTMLElement, EventMap extends HTMLE
      * prefix `data-` of the attributes name so calling `Data("id")` will return the value of an
      * attribute with the name `data-id`. `name` will always be converted to lowercase before
      * getting the attribute value so calling `Data("Id")` yields the same result as `Data("id")`.
-     * @returns The value of an attribute with the name `data-<lowercase-name>` or `null` if no
-     * attribute with this name exists on the underlying HTML element.
+     * @returns The string value of an attribute with the name `data-<lowercase-name>` or `null` if
+     * no attribute with this name exists on the underlying HTML element. An empty string indicates
+     * that the attribute is a 'boolean' attribute.
      * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/data-*
      */
     Data(name: string): NullableString;
@@ -604,7 +940,7 @@ export interface IElementComponent<T extends HTMLElement, EventMap extends HTMLE
      * attribute value so calling `data("Id", "123")` yields the same result as `data("id", "123")`.
      * @param value The value to be set for the attribute. If `value` is `null`, the attribute will
      * be removed from the underlying HTML element. If `value` is an empty string a 'boolean'
-     * attribute with the implicit value `true` is created.
+     * attribute with the implicit value `true` is created, see also the function `attribB()`.
      * @returns This instance.
      * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/data-*
      */
@@ -625,7 +961,7 @@ export interface IElementComponent<T extends HTMLElement, EventMap extends HTMLE
      *   `Disabled` state for components at any nested level in the sub-tree recursively.
      *   To support this, any component must implement the property `ParentDisabled` and the
      *   function `parentDisabled()` accordingly (for both see below).
-     * - To determine whether a component is actually in a deactivated state, the expression
+     * - To determine whether a component is actually in a disabled state, the expression
      *   `Disabled === true || ParentDisabled === true` must be used, as `Disabled` alone only
      *   represents the isolated state of the component, without its state in relation to the outer
      *   component tree.
@@ -699,114 +1035,94 @@ export interface IElementComponent<T extends HTMLElement, EventMap extends HTMLE
      * @param important If true, the style priority will be set to `!important`.
      */
     style(ruleName: CSSRuleNames, value: string, important?: boolean): this;
-
-    /**
-     * Get/set title attribute of the underlying HTML element. Setting Title to `null` will remove
-     * the `title` attribute from the element.
-     */
-    Title: NullableString;
-
-    /**
-     * Set the title attribute value of the underlying HTML element.
-     * @param title The title attribute value to be set. If title is `null`, the title attribute
-     * will be removed from the element.
-     * @returns This instance.
-     */
-    title(title: NullableString): this;
-
-    /**
-     * All currently registered event listeners (as a copy).
-     */
-    readonly Listeners: IEventListener[];
-
-    // emit?: (eventName: string, ...args: AnyType) => void;
-
-    /**
-     * Add a regular event listener to this component. This function must work identical to the
-     * `addEventListener` function. The listener is added to the `DOM` property of `this`.
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener
-     * @param type Event type (click, blur etc.).
-     * @param listener Listener function.
-     * @param options Event listener options.
-     * @returns This instance.
-     */
-    on<K extends keyof EventMap>(type: K, listener: (this: HTMLElement, ev: EventMap[K]) => AnyType, options?: boolean | AddEventListenerOptions): this;
-
-    /**
-     * Add a regular event listener to this component that is invoked at most once after being
-     * added. This function must work identical to the regular `addEventListener` function. The
-     * listener is added to the `DOM` property of `this` and automatically removed when invoked.
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener
-     * @param type Event type (click, blur etc.).
-     * @param listener Listener function.
-     * @param options Event listener options. In implementations, if `options` is a boolean value it
-     * must be replaced with `{capture: options, once: true}`, if `options` is an object or
-     * `undefined` or `null`, it must be replaced with `{...options, once: true}`.\
-     * __Note:__ Listeners added with `once` are ignored by `setAllEvents()`, it is also impossible
-     * to turn off, suspend or resume such listeners.
-     * @returns This instance.
-     */
-    once<K extends keyof EventMap>(type: K, listener: (this: HTMLElement, ev: EventMap[K]) => AnyType, options?: boolean | AddEventListenerOptions): this;
-
-    /**
-     * Remove a regular event listener from this component. This function must work identical to the
-     * regular `removeEventListener` function. The listener is removed from the `DOM` property of
-     * `this`.
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/removeEventListener
-     * @param type Event type (click, blur etc.).
-     * @param listener Listener function.
-     * @param options Event listener options.
-     * @returns This instance.
-     */
-    off<K extends keyof EventMap>(type: K, listener: (this: HTMLElement, ev: EventMap[K]) => AnyType, options?: boolean | AddEventListenerOptions): this;
-
-    /**
-     * Suspends an event listener if it can be found in the internal list of listeners and if it
-     * isn't already suspended. This is different from simply using `off()` and then `on()` again
-     * with the listener because the execution order of installed listeners is retained with using
-     * `suspend()`/`resume()`.
-     * @param type Event type (click, blur etc.).
-     * @param listener Listener function.
-     * @param options Event listener options.
-     * @returns This instance.
-     */
-    suspend<K extends keyof EventMap>(type: K, listener: (this: HTMLElement, ev: EventMap[K]) => AnyType, options?: boolean | AddEventListenerOptions): this;
-
-    /**
-     * Resumes an event listener if it can be found in the internal list of listeners and if it is
-     * suspended. This is different from simply using `off()` and then `on()` again with the
-     * listener because the execution order of installed listeners is retained with using
-     * `suspend()`/`resume()`.
-     * @param type Event type (click, blur etc.).
-     * @param listener Listener function.
-     * @param options Event listener options.
-     * @returns This instance.
-     */
-    resume<K extends keyof EventMap>(type: K, listener: (this: HTMLElement, ev: EventMap[K]) => AnyType, options?: boolean | AddEventListenerOptions): this;
-
-    /**
-     * Suspends or resumes the execution of _all currently_ registered regular event listeners on
-     * this component or removes all listeners permanently from this component. `allEvents()` must
-     * ignore listeners added with `once()`. If all listeners are suspended and then an additional
-     * listener is added this listener will be active.
-     * @param mode Can be one of `OFF`, `SUSPEND` or `RESUME`. `SUSPEND` and `RESUME` are used to
-     * suspend or resume the listeners execution. All listeners will be kept on the component.
-     * `OFF` instead will permanently remove alle registered listeners from this component. There
-     * is no way to restore these listeners (except they are held elesewhere and are re-registered
-     * via `on()`).
-     */
-    allEvents(mode: ALL_EVENTS): this;
 }
 
 /**
  * Base interface for HTML element based components, that *do not allow* adding children.
  */
-export interface IElementVoidComponent<T extends HTMLElementVoid, EventMap extends HTMLElementEventMap = HTMLElementEventMap> extends IElementComponent<T, EventMap> { }
+export interface IElementVoidComponent<T extends HTMLElementVoid, EventMap extends EventMapVoid = HTMLElementEventMap> extends IElementComponent<T, EventMap> { }
 
 /**
  * Base interface for HTML element based components, that *do allow* adding children.
  */
-export interface IElementWithChildrenComponent<T extends HTMLElementWithChildren, EventMap extends HTMLElementEventMap = HTMLElementEventMap> extends IElementComponent<T, EventMap>, IChildren { }
+export interface IElementWithChildrenComponent<T extends HTMLElementWithChildren, EventMap extends EventMapVoid = HTMLElementEventMap> extends IElementComponent<T, EventMap>, IChildren {
+    /**
+     * Set phrasing content of the component. This is a pure convenience setter which allows to add
+     * phrasing content in an easy way without having to resort to `append()`. This setter is
+     * primarly intended to be used with components like `Span`, `P` or similar.
+     * 
+     * __Notes:__
+     * - Setting phrasing content must remove _and dispose(!)_ all current children of the component
+     *   and append the new phrasing content.
+     * - A getter must not be implemented because the type of `Phrase` is `Phrase | Phrase[]`, but
+     *   some components also allow adding flow content (e.g. `<div>`) and in such cases
+     *   `Phrase | Phrase[]` would not fit as a return type!
+     * - If the length of `phrase` is greater than `1` then for any element of `phrase` that is of
+     *   type `string`, an instance of a class that implements `INodeComponent<Text>` must be
+     *   created with this string, so even pure text elements of `Children` are 'real' components.
+     * - If the length of `phrase` is `1` and the element in `phrase` is of type `string` the setter
+     *   _must not_ create an instance of a class that implements `INodeComponent<Text>` from the
+     *   string but instead set `textContent` to the string. This is done for speed reasons and
+     *   based on the assumption that a single string does not require its own component (setting a
+     *   dedicated single instance of `INodeComponent<Text>` remains of course possible).
+     * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Content_categories#phrasing_content
+     * @example
+     * ```typescript
+     * import { Em, Span, Text } from "@vanilla-ts/dom";
+     * 
+     * const span = new Span();
+     * // This only sets `textContent` to 'Hello World!'.
+     * span.Phrase = "Hello world!";
+     * // This replaces all children/`textContent` with an instance of an `Em` component.
+     * span.Phrase = new Em("Hello world!");
+     * // This replaces all children/`textContent` with `INodeComponent<Text>`/`Em` components.
+     * span.Phrase = ["Hello ", new Em("world"), "!"];
+     * // Setting a dedicated single `Text` _component_ is also possible (instead of `string`).
+     * span.Phrase = new Text("Hello world!");
+     * ```
+     */
+    Phrase: Phrase | Phrase[];
+
+    /**
+     * Set phrasing content of the component. This is a pure convenience function which allows to
+     * add phrasing content in an easy way without having to resort to `append()`. This function is
+     * primarly intended to be used with components like `Span`, `P` or similar.
+     * 
+     * __Notes:__
+     * - Setting phrasing content must remove _and dispose(!)_ all current children of the component
+     *   and append the new phrasing content.
+     * - If the length of `phrase` is greater than `1` then for any element of `phrase` that is of
+     *   type `string`, an instance of a class that implements `INodeComponent<Text>` must be
+     *   created with this string, so even pure text elements of `Children` are 'real' components.
+     * - If the length of `phrase` is `1` and the element in `phrase` is of type `string` the
+     *   function _must not_ create an instance of a class that implements `INodeComponent<Text>`
+     *   from the string but instead set `textContent` to the string. This is done for speed reasons
+     *   and based on the assumption that a single string does not require its own component
+     *   (setting a dedicated single instance of `INodeComponent<Text>` remains of course possible).
+     * @param phrase The phrasing content to be set as the new content for the component.
+     * @returns This instance.
+     * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Content_categories#phrasing_content
+     * @example
+     * ```typescript
+     * import { Em, Span } from "@vanilla-ts/dom";
+     * // The following 3 code lines all do not not create a `INodeComponent<Text>` but instead set
+     * // `textContent` to 'Hello World!'.
+     * const span = new Span("Hello world!");
+     * const span = new Span().phrase("Hello world!");
+     * // The initial `textContent` 'Foo' is replaced with 'Hello World!' (also `textContent`).
+     * const span = new Span("Foo").phrase("Hello world!");
+     *
+     * // The following 3 code lines all append _components_ build from the given parameters
+     * // (`INodeComponent<Text>` components/`Em` component).
+     * const span = new Span("Hello ", new Em("world"), "!");
+     * const span = new Span().phrase("Hello ", new Em("world"), "!");
+     * // The initial `textContent` 'Foo' is replaced with components build from the given
+     * // parameters (`INodeComponent<Text>`/`Em`).
+     * const span = new Span("Foo").phrase("Hello ", new Em("world"), "!");
+     * ```
+     */
+    phrase(...phrase: Phrase[]): this;
+}
 
 /**
  * Union interface for all _HTML element_ based components.
@@ -881,4 +1197,201 @@ export interface IComponentFactory<T extends IComponent> {
      * @returns A component that has been setup.
      */
     setupComponent(component: T, data?: unknown): T;
+}
+
+/**
+ * An event bus event. Passed to the functions `on()` and `once()` as the second parameter.
+ */
+export interface EventBusEvent {
+    /** `true`, if the event was canceled by a preceding listener, otherwise `false`. */
+    readonly Canceled: boolean;
+    /** Cancels the event, for further listeners the member `Canceled` will be `true`. */
+    cancel(): void;
+    /** Stops propagating the event to further listeners. */
+    stopPropagation(): void;
+}
+
+/**
+ * Interface for an event bus.
+ */
+export interface IEventBus<EventMap extends Record<keyof EventMap, AnyType>> {
+    /**
+     * Get the name of this event bus instance.
+     */
+    readonly Name: string;
+
+    /**
+     * An array of copies of all currently registered event listeners of this event bus.
+     */
+    readonly Listeners: IEventListener[];
+
+    /**
+     * Dispatches an event with event data to all registered listeners.
+     * @param type Event type.
+     * @param eventData The event data to dispatch. This parameter can be omitted only for events
+     * whose data type has been set to `undefined` or `null` in the event map, for all other event
+     * types it's mandatory!
+     * @returns This instance.
+     */
+    emit<K extends keyof EventMap>(type: K, eventData?: EventMap[K]): this;
+
+    /**
+     * Dispatches an event with event data to all registered listeners.
+     * @param type Event type.
+     * @param eventData The event data to dispatch. This parameter can be omitted only for events
+     * whose data type has been set to `undefined` or `null` in the event map, for all other event
+     * types it's mandatory!
+     * @param cancelable `true`, if the event can be canceled by listeners, otherwise `false`.
+     * The default value is always `false`.
+     * @returns `false`, if the event was canceled, otherwise `true`.
+     * @see `IEventBus.on()`.
+     */
+    dispatch<K extends keyof EventMap>(type: K, eventData?: EventMap[K], cancelable?: boolean): boolean;
+
+    /**
+     * Add an event listener to this event bus.
+     * @param type Event type.
+     * @param listener Listener function. This function will be called with the event data from the
+     * emitter as its first parameter. The second parameter is an object which allows to cancel the
+     * event and also to stop its propagation to further listeners:
+     * - `Canceled`: `true`, if the event has been canceled by a preceding listener, otherwise
+     *   `false`.
+     * - `cancel()`: This 'cancels' the event. Further listeners receiving the event can use the
+     *   member `Canceled` to check if the event has been canceled by a preceding listener. The
+     *   return value of `IEventBus.dispatch("type", data, true)` will be `false`, if any of the
+     *   listeners has called `cancel()` on this object.
+     * - `stopPropagation()`: Stops the propagation of the event to further listeners.
+     *
+     * Listener functions can omit the second parameter if it isn't needed.
+     * @example
+     * ```typescript
+     * interface SomeEventMap {
+     *   "test": "Cancel me!";
+     *   "obj": {
+     *     StringProp: string;
+     *     BooleanProp: boolean;
+     *   };
+     *   "ComplexType": {
+     *     "Prop1": string;
+     *     "SubObj": {
+     *       "Subrop": object;
+     *     }
+     *   }
+     *   "MsgOnly": undefined;
+     * }
+     * 
+     * class EventBus extends AEventBus<SomeEventMap> { }
+     * const eb = new EventBus("AppEventBus");
+     * 
+     * const listener1 = (eventData: SomeEventMap["test"], event: EventBusEvent) => {
+     *   console.log("listener1: Event data:", eventData, "Event:", event);
+     *   // Cancel event.
+     *   event.cancel();
+     *   // Stop further propagation (`listener2` will never be called).
+     *   event.stopPropagation();
+     * };
+     * 
+     * const listener2 = (eventData: SomeEventMap["test"], event: EventBusEvent) => {
+     *   // By commenting out `event.stopPropagation();` in `listener1` this log message will appear on
+     *   // the console and the `Canceled` memeber of `event` is `true`.
+     *   console.log("listener2: Event data:", eventData, "Event:", event);
+     * };
+     * 
+     * eb.on("test", listener1);
+     * eb.on("test", listener2);
+     * 
+     * // Event is cancelable.
+     * console.log("Executing 'dispatch(\"test\", \"Cancel me!\", true)' ...");
+     * let canceled = !eb.dispatch("test", "Cancel me!", true);
+     * console.log("dispatch(\"test\", \"Cancel me!\", true) returned:", canceled); // => true
+     * 
+     * // Event is not cancelable (`false` is the default value and can be omitted).
+     * console.log("Executing 'dispatch(\"test\", \"Cancel me!\", false)' ...");
+     * canceled = !eb.dispatch("test", "Cancel me!", false);
+     * console.log("dispatch(\"test\", \"Cancel me!\", false) returned:", canceled); // => false
+     * 
+     * // Dispatch another event with `emit()`.
+     * const listener3 = (eventData: SomeEventMap["obj"]) => {
+     *   console.log("listener3: Event data:", eventData);
+     * };
+     * eb.once("obj", listener3);
+     * eb.emit("obj", {
+     *   StringProp: "Events can be any type of data.",
+     *   BooleanProp: true
+     * }); // => listener3: Event data: {StringProp: "Events can be any type of data.", BooleanProp: true}
+     * 
+     * // Dispatching pure messages without any additional data is also possible. Please note that
+     * // in such cases the event data passed to the listener function will always be `null`, even
+     * // if the data type defined in the event map is `undefined`!
+     * const listener4 = (eventData: SomeEventMap["MsgOnly"]) => {
+     *   console.log("listener4: Event data:", eventData);
+     * };
+     * eb.on("MsgOnly", listener4);
+     * eb.emit("MsgOnly"); // => listener4: Event data: null
+     * ```
+     * @returns This instance.
+     */
+    on<K extends keyof EventMap>(type: K, listener: (eventData: EventMap[K], event: EventBusEvent) => AnyType): this;
+
+    /**
+     * Add an event listener to this event bus that is invoked at most once after being added. The
+     * listener is automatically inactive after its invocation.\
+     * __Note:__ Listeners added with `once` are ignored by `allEvents()`, it is also impossible
+     * to turn off, suspend or resume such listeners.
+     * @param type Event type.
+     * @param listener Listener function.
+     * @returns This instance.
+     * @see `IEventBus.on()`.
+     */
+    once<K extends keyof EventMap>(type: K, listener: (eventData: EventMap[K], event: EventBusEvent) => AnyType): this;
+
+    /**
+     * Remove an event listener from this event bus.
+     * @param type Event type.
+     * @param listener Listener function.
+     * @returns This instance.
+     */
+    off<K extends keyof EventMap>(type: K, listener: (eventData: EventMap[K]) => AnyType): this;
+
+    /**
+     * Suspends an event listener if it can be found in the internal list of listeners _and_ if it
+     * isn't already suspended. This is different from simply using `off()` and then `on()` again
+     * with the listener because the execution order of installed listeners is retained with using
+     * `suspend()`/`resume()`.
+     * @param type Event type.
+     * @param listener Listener function.
+     * @returns This instance.
+     */
+    suspend<K extends keyof EventMap>(type: K, listener: (eventData: EventMap[K]) => AnyType): this;
+
+    /**
+     * Resumes an event listener if it can be found in the internal list of listeners _and_ if it is
+     * suspended. This is different from simply using `off()` and then `on()` again with the
+     * listener because the execution order of installed listeners is retained with using
+     * `suspend()`/`resume()`.
+     * @param type Event type (click, blur etc.).
+     * @param listener Listener function.
+     * @returns This instance.
+     */
+    resume<K extends keyof EventMap>(type: K, listener: (eventData: EventMap[K]) => AnyType): this;
+
+    /**
+     * Suspends or resumes the execution of _all currently_ registered event listeners on this event
+     * bus or removes all listeners permanently from this event bus. `allEvents()` must ignore
+     * listeners added with `once()`. If all listeners are suspended and then an additional listener
+     * is added this listener will be active.
+     * @param mode Can be one of `OFF`, `SUSPEND` or `RESUME`. `SUSPEND` and `RESUME` are used to
+     * suspend or resume the listeners execution. All listeners will be kept on the event bus.
+     * `OFF` instead will permanently remove alle registered listeners from event bus. There
+     * is no way to restore these listeners (except they are held elesewhere and are re-registered
+     * via `on()`).
+     */
+    allEvents(mode: ALL_EVENTS): this;
+
+    /**
+     * Disposes the event bus. After that, the bus can no longer be used, calling any of it's
+     * functions will result in a `TypeError` due to an undefined object.
+     * @returns This instance.
+     */
+    dispose(): this;
 }

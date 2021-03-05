@@ -1,3 +1,4 @@
+import { ANodeComponent } from "../src/Classes.js";
 import {
     ComponentFactory,
     ElementComponentVoid,
@@ -25,6 +26,14 @@ import {
 ////////////////////////
 // Base components
 ////////////////////////
+
+// Implementation for a text node component.
+export class TextComponent extends ANodeComponent<Text> {
+    constructor(text: string) {
+        super();
+        this._dom = document.createTextNode(text);
+    }
+}
 
 // Simple container component based on a <div> element.
 export class Container extends ElementComponentWithChildren<HTMLDivElement> {

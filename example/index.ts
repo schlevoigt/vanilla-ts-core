@@ -2,12 +2,11 @@ import {
     CSSClassNameFactory,
     ElementComponentVoid,
     ElementComponentWithChildren,
-    TextComponent,
     WrappedDOMElementComponentWithChildren
 } from "../src/Components.js";
 import {
     mixinComponentFactories
-} from "../src/Types.js";
+} from "../src/Utils.js";
 import {
     ButtonFactory,
     LabeledContainerFactory,
@@ -16,7 +15,8 @@ import {
     LabeledTextInput,
     LabeledTextInputFactory,
     LoginComponent,
-    LoginComponentFactory
+    LoginComponentFactory,
+    TextComponent
 } from "./lib.js";
 
 
@@ -29,7 +29,7 @@ const $ = new (mixinComponentFactories(
     ButtonFactory,
     LoginComponentFactory)
     // For these two constructor parameters see class `CSSClassNameFactory` in `Components.ts`.
-    // `vt` => prefix for applied CSS class names.
+    // `vts` => prefix for applied CSS class names.
     // `deep = true`, apply CSS class names recursively.
 )("vts", true);
 

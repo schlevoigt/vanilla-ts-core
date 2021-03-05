@@ -5,7 +5,17 @@ html {
 body {
     background-color: rgba(245, 245, 245, 1);
 }
-
+* {
+    box-sizing: border-box;
+    -webkit-user-select: none;
+    user-select: none;
+    cursor: default;
+}
+.text-selectable {
+    -webkit-user-select: text;
+    user-select: text;
+    cursor: text;
+}
 h2 {
     margin: 1rem 1rem 2rem 1rem;
 }
