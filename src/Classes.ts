@@ -499,7 +499,7 @@ export abstract class AElementComponent<T extends (HTMLElementWithChildren | HTM
     /** @inheritdoc */
     public override onBeforeMount(parent: IElementWithChildrenComponent<HTMLElementWithChildren>): void {
         super.onBeforeMount(parent);
-        parent.Disabled
+        parent.Disabled || parent.ParentDisabled
             ? this.parentDisabled(true)
             : undefined;
     }
@@ -729,10 +729,11 @@ export type InputModeAttrValues = "none" | "text" | "decimal" | "numeric" | "tel
 export type PopoverAttrValues = "auto" | "manual" | null;
 
 /**
- * Possible values of the ability of an element to be resized.
- * @see The note for the corresponding property `Resizable` in class `GlobalDOMAttributes`.
+ * Possible values for the ability of an element to be resized.
+ * @see https://developer.mozilla.org/en-US/docs/Web/CSS/resize and the note for the corresponding
+ * property `Resizable` in class `GlobalDOMAttributes`.
  */
-export type ResizableValues = "none" | "both" | "horizontal" | "vertical" | "block" | "inline";
+export type ResizableValues = false | "none" | "both" | "horizontal" | "vertical" | "block" | "inline";
 
 /**
  * This class contains various implementations of global DOM attributes that are valid for all DOM
@@ -959,11 +960,14 @@ export abstract class GlobalDOMAttributes<T extends HTMLElement> extends ANodeCo
      * Get/set the ability to be resized of the component.\
      * __Note:__ _This is not a DOM attribute property!_ Instead it is a CSS property that is
      * available on almost all HTML elements so it is made available here as a pseudo DOM property
-     * just for convenience. Please also note the requirements explained in the `@see` comment.
+     * just for convenience. Please also note the requirements explained in the `@see` comment.\
+     * The value `false` means that the CSS `resize` property on the component has no explicit value
+     * set, this is valid for both reading and writing the property, however, the behavior is
+     * equivalent to the value `none`.
      * @see https://developer.mozilla.org/en-US/docs/Web/CSS/resize
      */
     public get Resizable(): ResizableValues {
-        return <ResizableValues>this.DOM.style.resize;
+        return <ResizableValues>this._dom.style.resize || false;
     }
     /** @inheritdoc */
     public set Resizable(v: ResizableValues) {
@@ -975,16 +979,16 @@ export abstract class GlobalDOMAttributes<T extends HTMLElement> extends ANodeCo
      * __Note:__ _This is not a DOM attribute property!_ Instead it is a CSS property that is
      * available on almost all HTML elements so it is made available here as a pseudo DOM property
      * just for convenience. Please also note the requirements explained in the `@see` comment.
-     * @param v The value to be set.
+     * @param v The value to be set. The value `false` means that the CSS `resize` property on the
+     * component has no explicit value set, this is valid for both reading and writing the property,
+     * however, the behavior is equivalent to the value `none`.
      * @returns This instance.
      * @see https://developer.mozilla.org/en-US/docs/Web/CSS/resize
      */
     public resizable(v: ResizableValues): this {
-        if (v === "none") {
-            this._dom.style.removeProperty("resize");
-        } else {
-            this._dom.style.resize = v;
-        }
+        v === false
+            ? this._dom.style.removeProperty("resize")
+            : this._dom.style.resize = v;
         return this;
     }
 
@@ -1481,8 +1485,40 @@ export abstract class AElementComponentWithInternalUI<T extends IElementWithChil
     public override disabled(disabled: boolean): this {
         if (disabled !== this._disabled) {
             super.disabled(disabled);
-            if (!this.#mountUI) {
-                this.ui.disabled(disabled);
+            /**
+             * Do not propagate the state further if a component up in the tree is still disabled,
+             * so only set the 'Disabled' state of this component in isolation.
+             */
+            if (this._parentDisabled) {
+                return this;
+            }
+            /** Propagate the new `Disabled` state to all children of `this.ui`. */
+            for (const child of this.ui.Children) {
+                if (child.ComponentType === ComponentType.ELEMENT || child.ComponentType === ComponentType.ELEMENT_WITH_CHILDREN) {
+                    (<IIsElementComponent>child).parentDisabled(this._disabled);
+                }
+            }
+        }
+        return this;
+    }
+
+    /** @inheritdoc */
+    public override parentDisabled(disabled: boolean): this {
+        if (disabled !== this._parentDisabled) {
+            super.parentDisabled(disabled);
+            /**
+             * If `Disabled` is `true`, the state `ParentDisabled` already has been propagated to all
+             * children so they are ignored. This maintains the correct `Disabled`/`ParentDisabled`
+             * state of sub-trees at any depth.
+             */
+            if (this._disabled) {
+                return this;
+            }
+            /** Otherwise propagate the new `Disabled` state to all children of `this.ui`. */
+            for (const child of this.ui.Children) {
+                if (child.ComponentType === ComponentType.ELEMENT || child.ComponentType === ComponentType.ELEMENT_WITH_CHILDREN) {
+                    (<IIsElementComponent>child).parentDisabled(this._parentDisabled);
+                }
             }
         }
         return this;
@@ -1542,6 +1578,22 @@ export abstract class AElementComponentWithInternalUI<T extends IElementWithChil
             this.ui.clear();
         }
         return this;
+    }
+
+    /** @inheritdoc */
+    public override onDidUnmount(): void {
+        this._parentDisabled
+            ? this.parentDisabled(false)
+            : undefined;
+        super.onDidUnmount();
+    }
+
+    /** @inheritdoc */
+    public override onBeforeMount(parent: IElementWithChildrenComponent<HTMLElementWithChildren>): void {
+        super.onBeforeMount(parent);
+        parent.Disabled || parent.ParentDisabled
+            ? this.parentDisabled(true)
+            : undefined;
     }
 
     /** @inheritdoc */
