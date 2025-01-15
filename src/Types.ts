@@ -57,7 +57,7 @@ export type HTMLElementVoidTagName = "area" | "base" | "br" | "col" | "embed" | 
  */
 export type HTMLElementWithChildren =
     HTMLAnchorElement | HTMLAudioElement | HTMLQuoteElement | HTMLBodyElement | HTMLButtonElement
-    | HTMLCanvasElement | HTMLTableCaptionElement | HTMLDataElement | HTMLDataListElement
+    | HTMLCanvasElement | HTMLTableCaptionElement | HTMLDataElement | HTMLDataListElement | HTMLElement
     | HTMLModElement | HTMLDetailsElement | HTMLDivElement | HTMLDListElement | HTMLFieldSetElement
     | HTMLFormElement | HTMLHeadingElement | HTMLHeadElement | HTMLHtmlElement | HTMLIFrameElement
     | HTMLLabelElement | HTMLLegendElement | HTMLLIElement | HTMLMapElement | HTMLMenuElement
@@ -85,7 +85,7 @@ export type HTMLElementWithPhrasingContentTagName =
     | "abbr" | "audio" | "b" | "bdi" | "bdo" | "br" | "button" | "canvas" | "cite" | "code" | "data"
     | "datalist" | "dfn" | "em" | "embed" | "i" | "iframe" | "img" | "input" | "kbd" | "label"
     | "mark" | /*"math" |*/ "meter" | "noscript" | "object" | "output" | "picture" | "progress"
-    | "q" | "ruby" | "s" | "samp" | "script" | "select" | "slot" | "small" | "span" | "strong"
+    | "q" | "ruby" | "s" | "samp" | "script" | "section" | "select" | "slot" | "small" | "span" | "strong"
     | "sub" | "sup" | /*"svg" |*/ "template" | "textarea" | "time" | "u" | "var" | "video" | "wbr";
 
 /**
