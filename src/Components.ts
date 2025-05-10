@@ -25,7 +25,7 @@ import { toKebapCase } from "./Utils.js";
 
 /**
  * Base implementation for all components, *that do not allow* to add child components.
- * @see AElementComponentVoid
+ * @see {@link AElementComponentVoid}
  */
 export class ElementComponentVoid<T extends HTMLElementVoid, EventMap extends EventMapVoid = HTMLElementEventMap> extends AElementComponentVoid<T, EventMap> {
     /**
@@ -48,7 +48,7 @@ export class ElementComponentVoid<T extends HTMLElementVoid, EventMap extends Ev
 
 /**
  * Base implementation for all components, *that do allow* to add child components.
- * @see AElementComponentWithChildren
+ * @see {@link AElementComponentWithChildren}
  */
 export class ElementComponentWithChildren<T extends HTMLElementWithChildren, EventMap extends EventMapVoid = HTMLElementEventMap> extends AElementComponentWithChildren<T, EventMap> {
     /**
@@ -109,7 +109,7 @@ export class WrappedDOMElementComponentWithChildren<EventMap extends EventMapVoi
 
 /**
  * Base implementation of a fragment that holds components.
- * @see AFragmentComponent
+ * @see {@link AFragmentComponent}
  */
 export class FragmentComponent extends AFragmentComponent {
     /**
@@ -127,7 +127,7 @@ export class FragmentComponent extends AFragmentComponent {
  * Base implementation for a component factory. This implementation doesn't do anything in
  * `setupComponent` but it may be useful as the base for custom factories that support a fluent API
  * for creating components. `setupComponent` can be overridden later to set up components.
- * @see AComponentFactory
+ * @see {@link AComponentFactory}
  * @example
  * ```typescript
  * class MyFactory extends VTSComponentFactory<IComponent> {

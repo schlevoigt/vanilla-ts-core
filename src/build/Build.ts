@@ -106,7 +106,7 @@ type CSSFileProcessingOptions = {
      *   return value conforms to valid CSS.
      *
      * Default: `region`.
-     * @see `RelativeTo` for information on how the filenames written in the comments are formed.
+     * @see {@link CSSFileProcessingOptions.RelativeTo} for information on how the filenames written in the comments are formed.
      */
     Header?: "file" | "region" | false | `/*${string}*/` | ((fileName: string, relativeTo: string) => string);
     /**
@@ -137,7 +137,7 @@ type CSSFileProcessingOptions = {
      *   return value conforms to valid CSS.
      *
      * Default : `end-region`
-     * @see `RelativeTo` for information on how the filenames written in the comments are formed.
+     * @see {@link CSSFileProcessingOptions.RelativeTo} for information on how the filenames written in the comments are formed.
      */
     Footer?: "cmt" | "end-region" | "end-region-file" | false | `/*${string}*/` | ((fileName: string, relativeTo: string) => string);
     /**
@@ -198,7 +198,7 @@ type ScriptFileOptions = {
      * Defines glob patterns and glob options for additional directories/files to be scanned when
      * looking up CSS files potentially used by `SourceFile`.\
      * Default: `{}`.
-     * @see The documentation of the function `concatCSS()`.
+     * @see The documentation of the function {@link concatCSS()}.
      */
     Lookup?: {
         /** A glob pattern as defined by the node module `fast-glob`. */

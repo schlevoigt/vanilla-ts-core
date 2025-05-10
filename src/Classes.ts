@@ -44,7 +44,7 @@ import {
 
 /**
  * Abstract base implementation of _all_ components.
- * @see IComponent
+ * @see {@link IComponent}
  */
 export abstract class AComponent implements IComponent {
     /** State of `Disposed` of this component. */
@@ -131,7 +131,7 @@ export abstract class AComponent implements IComponent {
 
 /**
  * Abstract base implementation of all node or element based components.
- * @see INodeComponent
+ * @see {@link INodeComponent}
  */
 export abstract class ANodeComponent<T extends Node, EventMap extends EventMapVoid = HTMLElementEventMap> extends AComponent implements INodeComponent<T, EventMap> {
     /** The underlying node or element. */
@@ -372,8 +372,8 @@ export abstract class ANodeComponent<T extends Node, EventMap extends EventMapVo
      *   this. But if a component is derived from AElementComponent and builds its own opaque (set
      *   or tree of) components, `dispose()` _must_ be overridden and it _must_ ensure that all
      *   these self-generated components are disposed of.
-     * @see IDisposable.dispose()
-     * @see Class `AElementComponentWithInternalUI`.
+     * @see {@link IDisposable.dispose()}
+     * @see {@link AElementComponentWithInternalUI}.
      */
     public override dispose(): void {
         this.allEvents(ALL_EVENTS.OFF);
@@ -448,7 +448,7 @@ export abstract class ANodeComponent<T extends Node, EventMap extends EventMapVo
  * Implementation of `IGlobalDOMAttributes<T>`. Currently these attributes are added as mixins to
  * `AElementComponent` to avoid getting that class really big.
  * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes
- * @see `IGlobalDOMAttributes<T>``
+ * @see {@link IGlobalDOMAttributes}
  */
 export abstract class AGlobalDOMAttributes<T extends HTMLElement, EventMap extends EventMapVoid = HTMLElementEventMap> extends ANodeComponent<T, EventMap> implements IGlobalDOMAttributes {
     /** @inheritdoc */
@@ -694,7 +694,7 @@ export abstract class AGlobalDOMAttributes<T extends HTMLElement, EventMap exten
 
 /**
  * Abstract base implementation of all HTML element based components.
- * @see IElementComponent
+ * @see {@link IElementComponent}
  */
 export abstract class AElementComponent<T extends (HTMLElementWithChildren | HTMLElementVoid), EventMap extends EventMapVoid = HTMLElementEventMap> extends ANodeComponent<T, EventMap> implements IElementComponent<T, EventMap> { // eslint-disable-line @typescript-eslint/no-unsafe-declaration-merging
     static {
@@ -702,7 +702,7 @@ export abstract class AElementComponent<T extends (HTMLElementWithChildren | HTM
         mixinDOMAttributes(AElementComponent, AGlobalDOMAttributes);
     }
 
-    /** @see Instance property `DefaultCSSClassName`. */
+    /** @see Instance property {@link AElementComponent.DefaultCSSClassName}. */
     public static get DefaultCSSClassName(): string {
         return (<Record<string, AnyType>>this)["__ccn__" + this.name] ?? ((<Record<string, AnyType>>this)["__ccn__" + this.name] = toKebapCase(this.name)); // eslint-disable-line @typescript-eslint/no-unsafe-return
     }
@@ -985,7 +985,7 @@ export interface AElementComponent<T extends (HTMLElementWithChildren | HTMLElem
 
 /**
  * Abstract base implementation of a component, *that does not allow* adding child components.
- * @see IElementVoidComponent
+ * @see {@link IElementVoidComponent}
  */
 export abstract class AElementComponentVoid<T extends HTMLElementVoid, EventMap extends EventMapVoid = HTMLElementEventMap> extends AElementComponent<T, EventMap> implements IElementVoidComponent<T, EventMap> { }
 
@@ -1352,7 +1352,7 @@ export abstract class AChildren<T extends HTMLElementWithChildren, EventMap exte
      *   return this;
      * }
      * ```
-     * @see `AElementComponentWithChildren`.
+     * @see {@link AElementComponentWithChildren}
      * @returns This instance.
      */
     protected abstract clearOwner(): this;
@@ -1482,7 +1482,7 @@ export abstract class AElementComponentWithChildren<T extends HTMLElementWithChi
      * Default implementation. For classes simply extending `AElementComponentWithChildren` there is
      * almost nothing to do except for removing DOM child nodes which have been left over (usually
      * pure text nodes form `Phrase/phrase()`).
-     * @see `AChildren.clearOwner()`.
+     * @see {@link AChildren.clearOwner()}
      * @returns This instance.
      */
     protected clearOwner(): this {
@@ -1709,8 +1709,8 @@ export abstract class AElementComponentWithInternalUI<UI extends IElementWithChi
     }
 
     /**
-     * @see `this.clear()`.
-     * @see `AChildren.clearOwner()`.
+     * @see {@link clear()}
+     * @see {@link AChildren.clearOwner()}
      * @returns This instance.
      */
     protected clearOwner(): this {
@@ -1737,8 +1737,8 @@ export abstract class AElementComponentWithInternalUI<UI extends IElementWithChi
      * behavior is maintained. So `clear()` must never be overridden in classes that inherit from
      * `AElementComponentWithInternalUI` _and_ that use `AChildren`! Instead override and implement
      * `clearOwner()` if needed in such cases!!
-     * @see `IChildren.clear()`.
-     * @see `AChildren.clearOwner()`.
+     * @see {@link IChildren.clear()}
+     * @see {@link AChildren.clearOwner()}
      * @returns This instance.
      */
     public clear(): this {
@@ -1754,7 +1754,7 @@ export abstract class AElementComponentWithInternalUI<UI extends IElementWithChi
 
 /**
  * Abstract base implementation of a fragment.
- * @see IFragment
+ * @see {@link IFragment}
  */
 export abstract class AFragmentComponent extends AComponent implements IFragment {
     /**
@@ -1875,7 +1875,7 @@ export abstract class AFragmentComponent extends AComponent implements IFragment
      * __Note:__ This doesn't destroy/dispose the child components. If references to the child
      * components are stored elsewhere, they can be reused.
      * @inheritdoc
-     * @see IDisposable.dispose()
+     * @see {@link IDisposable.dispose()}
      */
     public override dispose(): void {
         for (const component of this._children) {
@@ -1893,7 +1893,7 @@ export abstract class AFragmentComponent extends AComponent implements IFragment
 
 /**
  * Abstract base implementation of a component factory. Currently without any further functionality.
- * @see IComponentFactory
+ * @see {@link IComponentFactory}
  */
 export abstract class AComponentFactory<T extends IComponent> implements IComponentFactory<T> {
     /** @inheritdoc */
@@ -2073,7 +2073,7 @@ export class AEventBus<EventMap extends Record<keyof EventMap, AnyType>> impleme
     /** @inheritdoc */
     public once<K extends keyof EventMap>(type: K, listener: (eventData: EventMap[K], event: EventBusEvent) => AnyType): this {
         // eslint-disable-next-line jsdoc/require-param
-        /** @see `wrappedListener` in AEventBus.on() */
+        /** @see `wrappedListener` in {@link AEventBus.on()} */
         const wrappedListener = (ev: CustomEvent<EventMap[K]>): AnyType => {
             listener(ev.detail, {
                 /* eslint-disable jsdoc/require-jsdoc */

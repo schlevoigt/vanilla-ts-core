@@ -555,8 +555,8 @@ export interface IComponent extends IDisposable {
 
     /**
      * Set the pointer content for this component.
-     * @see `Pointer`
      * @param pointer The pointer (string) to be set. Passing `undefined` 'clears' the pointer.
+     * @see {@link IElementComponent.Pointer}
      * @returns This instance.
      */
     pointer(pointer?: string): this;
@@ -1004,8 +1004,8 @@ export interface IElementComponent<T extends HTMLElement, EventMap extends Event
     /**
      * Set the appearance and behavior of a component in relation to an activated/deactivated state.
      * @param disabled `true` to disable the component, `false` to enable it.
+     * @see {@link IElementComponent.Disabled}
      * @returns This instance.
-     * @see Property `Disabled`.
      */
     disabled(disabled: boolean): this;
 
@@ -1030,7 +1030,7 @@ export interface IElementComponent<T extends HTMLElement, EventMap extends Event
 
     /**
      * Get/set the visibility state of the underlying HTML element.
-     * @see function `visible()`
+     * @see {@link visible()}
      */
     Visible: boolean;
 
@@ -1044,7 +1044,7 @@ export interface IElementComponent<T extends HTMLElement, EventMap extends Event
 
     /**
      * Get/set the hidden state of the underlying HTML element.
-     * @see function `hidden()`
+     * @see {@link hidden()}
      */
     Hidden: boolean;
 
@@ -1336,7 +1336,7 @@ export interface IEventBus<EventMap extends Record<keyof EventMap, AnyType>> {
      * @param cancelable `true`, if the event can be canceled by listeners, otherwise `false`.
      * The default value is always `false`.
      * @returns `false`, if the event was canceled, otherwise `true`.
-     * @see `IEventBus.on()`.
+     * @see {@link IEventBus.on()}
      */
     dispatch<K extends keyof EventMap>(type: K, eventData?: EventMap[K], cancelable?: boolean): boolean;
 
@@ -1433,7 +1433,7 @@ export interface IEventBus<EventMap extends Record<keyof EventMap, AnyType>> {
      * @param type Event type.
      * @param listener Listener function.
      * @returns This instance.
-     * @see `IEventBus.on()`.
+     * @see {@link IEventBus.on()}
      */
     once<K extends keyof EventMap>(type: K, listener: (eventData: EventMap[K], event: EventBusEvent) => AnyType): this;
 
