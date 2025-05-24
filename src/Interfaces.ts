@@ -486,7 +486,7 @@ export interface IChildren {
      * elements from their parent HTML elements. The removed components _must_ also be disposed of.
      * In some cases, the entire component must be considered largely unusable after this process
      * (except for components that do not implement any functions other than the inclusion of
-     * children, such as a `Div' component).\
+     * children, such as a `Div` component).\
      * __Important note:__ `clear()` is not only meant to handle its own children but any component
      * that may exist besides the children collection! If, for example, the parent component has a
      * separate/additional component tree besides the children collection, `clear()` must also
