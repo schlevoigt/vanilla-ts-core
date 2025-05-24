@@ -254,3 +254,126 @@ export const ModifierKeys = (() => {
 export function toKebapCase(s: string): string {
     return s.replace(/[A-Z]+(?![a-z])|[A-Z]/g, (c, o) => (o ? "-" : "") + c.toLowerCase());
 }
+
+/**
+ * Get a rectangle (`DOMRect`) that contains the position and size of an HTML element The position
+ * is calculated relative to the parent element of `elem`. The size includes the border width and
+ * padding of `elem`.
+ * @param elem The HTML element for which the rectangle is to be calculated.
+ * @returns A rectangle containing the position (relative to its parent element) and size (including
+ * border width and padding) of an HTML element.
+ */
+export function getClientRect(elem: HTMLElement): DOMRect {
+    const childRect = elem.getBoundingClientRect();
+    const parentRect = elem.parentElement?.getBoundingClientRect();
+    return new DOMRect(
+        childRect.left - (parentRect?.left ?? 0),
+        childRect.top - (parentRect?.top ?? 0),
+        elem.offsetWidth,
+        elem.offsetHeight
+    );
+}
+
+/**
+ * Return type of the function `getDebouncedFnc`.
+ */
+interface IDebounceFunctionReturn<F extends (...args: AnyType) => AnyType> extends Array<IDebouncedFunction<F> | (() => void)> {
+    /** Original function as debounced function. */
+    0: (...args: Parameters<F>) => Promise<ReturnType<F>>;
+    /** Cancellation of debouncing. */
+    1: () => void;
+    /** Call the original function. `cancel=true` cancels the debouncing at the same time. */
+    2: (cancel?: boolean) => ReturnType<F>;
+    /** Check whether debouncing is still active. */
+    3: () => boolean;
+}
+
+/**
+ * Type of the function created with `getDebouncedFnc`.
+ */
+interface IDebouncedFunction<F extends (...args: AnyType) => AnyType> {
+    (...args: Parameters<F>): Promise<ReturnType<F>>;
+}
+
+/**
+ * Creates a function that is called with a delay of `timeout` milliseconds via debouncing. If this
+ * function is called several times *before* `timeout` has expired, the timeout is reset each time
+ * and the call is delayed again by `timeout` milliseconds.
+ * @param fnc The function that is to be called with a delay (as a promise).
+ * @param timeout Time in milliseconds after which `fnc` is to be called.
+ * @param immediateLeadingInvoke If `true`, then the *first* call of `fnc` is executed *without*
+ * delay, all *further* calls are then executed with delay. After `fnc` has been called with a
+ * delay, the next call to `fnc` is executed immediately and so on. This option is therefore
+ * suitable for bundling groups of calls that are further apart in time so that the first call of
+ * `fnc` at the beginning of a group is executed immediately and only the subsequent calls are
+ * delayed. Default: `false`.
+ * @returns An array with four elements:
+ *
+ * - First element (function): A function with the same signature as the function passed to
+ *   `getDebouncedFnc()`. This is the function that must be called in order to actually call the
+ *   passed function (`fnc()`).
+ * - Second element (function): This function can be used to cancel debouncing, i.e. `fnc()` is
+ *   never called and debouncing starts again only if `fnc()` is called again.
+ * - Third element (function): Calls the initially passed function (`fnc()`) immediately. With the
+ *   parameter `true` the debouncing is aborted at the same time, otherwise `fnc()` is called again
+ *   later.
+ * - Fourth element (function): Checks whether debouncing is still active, i.e. `fnc()` is still
+ *   waiting for its delayed call.
+ *
+ * Largely adopted (and expanded) from:
+ * @see https://github.com/Bwca/np__merry-solutions__debounce
+ * The following example displays `bar` and `rab` on the console almost immediately and again `bar`
+ * after approx. 5 seconds.
+ * @example
+ * function reverseFnc(s: string): string {
+ *     console.log(s);
+ *     return s.split("").reverse().join("");
+ * }
+ *
+ * const [reverse, _, immediate] = getDebouncedFnc(reverseFnc, 5000, false);
+ *
+ * reverse("foo");
+ * reverse("bar");
+ * console.log(immediate(false));
+ */
+export function getDebouncedFnc<F extends (...args: AnyType) => AnyType>(fnc: F, timeout: number, immediateLeadingInvoke: boolean = false): IDebounceFunctionReturn<F> {
+    let timeoutHandler: ReturnType<typeof setTimeout> | undefined = undefined;
+    let _args: Parameters<F>;
+    let leadingInvoked = false;
+
+    const _clearTimeout = (): void => { // eslint-disable-line jsdoc/require-jsdoc
+        !timeoutHandler || clearTimeout(timeoutHandler);
+        timeoutHandler = undefined;
+    };
+
+    const debouncedFnc: IDebouncedFunction<F> = (...args: Parameters<F>): Promise<ReturnType<F>> => // eslint-disable-line jsdoc/require-jsdoc
+        new Promise((resolve: (value: ReturnType<F> | PromiseLike<ReturnType<F>>) => void): void => {
+            _args = args;
+            _clearTimeout();
+            if (immediateLeadingInvoke && !leadingInvoked) {
+                leadingInvoked = true;
+                resolve(fnc(...args as AnyType[])); // eslint-disable-line @typescript-eslint/no-unsafe-argument
+            } else {
+                timeoutHandler = setTimeout((): void => {
+                    _clearTimeout();
+                    leadingInvoked = false;
+                    resolve(fnc(...args as AnyType[])); // eslint-disable-line @typescript-eslint/no-unsafe-argument
+                }, timeout);
+            }
+        });
+
+    const cancel: () => void = (): void => { // eslint-disable-line jsdoc/require-jsdoc
+        _clearTimeout();
+    };
+
+    const immediate: (cancel?: boolean) => ReturnType<F> = (cancel: boolean = true): ReturnType<F> => { // eslint-disable-line jsdoc/require-jsdoc
+        !cancel || _clearTimeout();
+        return fnc(..._args as AnyType[]); // eslint-disable-line @typescript-eslint/no-unsafe-return,@typescript-eslint/no-unsafe-argument
+    };
+
+    const active: () => boolean = (): boolean => { // eslint-disable-line jsdoc/require-jsdoc
+        return timeoutHandler !== undefined;
+    };
+
+    return [debouncedFnc, cancel, immediate, active];
+}
