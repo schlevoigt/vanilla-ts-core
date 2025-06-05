@@ -8,6 +8,7 @@ import {
 } from "./Interfaces.js";
 import {
     HTMLElementWithAlt,
+    HTMLElementWithAutocomplete,
     HTMLElementWithCrossorigin,
     HTMLElementWithDisabled,
     HTMLElementWithDownload,
@@ -70,6 +71,42 @@ export abstract class AltAttr<T extends HTMLElementWithAlt, EventMap extends HTM
         return this;
     }
 }
+
+/**
+ * Possible values for the `autocomplete` attribute.\
+ * __Note__: Currently there is no typing for the `string` part of the union.
+ * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/autocomplete
+ */
+export type AutocompleteAttributeValues = "on" | "off" | string | null; // eslint-disable-line @typescript-eslint/no-redundant-type-constituents
+
+/**
+ * 'Autocomplete' getter/setter and set method returning this instance.
+ */
+export abstract class AutocompleteAttr<T extends HTMLElementWithAutocomplete, EventMap extends HTMLElementEventMap = HTMLElementEventMap> extends AElementComponent<T, EventMap> {
+    /**
+     * Get/set the `autocomplete` attribute value of the component. Allowed values are `on`, `off`,
+     * strings and `null`. `null` or an empty string removes the attribute.
+     */
+    public get Autocomplete(): AutocompleteAttributeValues {
+        return <AutocompleteAttributeValues>this._dom.autocomplete;
+    }
+    /** @inheritdoc */
+    public set Autocomplete(v: AutocompleteAttributeValues) {
+        this.autocomplete(v);
+    }
+
+    /**
+     * Set `autocomplete` attribute value of the component. Allowed values are `on`, `off`, strings
+     * and `null`. `null` or an empty string removes the attribute.
+     * @param v The value to be set.
+     * @returns This instance.
+     */
+    public autocomplete(v: AutocompleteAttributeValues): this {
+        this.attrib("autocomplete", v ? v : null);
+        return this;
+    }
+}
+
 
 /**
  * Custom 'checked' event for checkboxes and radio buttons. Like `change` and `input` this event is
@@ -822,7 +859,7 @@ export abstract class RequiredAttr<T extends HTMLElementWithRequired, EventMap e
 /**
  * 'Size' getter/setter and set method returning this instance.
  */
-export abstract class SizeAttr<T extends HTMLInputElement, EventMap extends HTMLElementEventMap = HTMLElementEventMap> extends AElementComponent<T, EventMap> {
+export abstract class SizeAttr<T extends HTMLInputElement | HTMLSelectElement, EventMap extends HTMLElementEventMap = HTMLElementEventMap> extends AElementComponent<T, EventMap> {
     /**
      * Get/set the `size` attribute value of the component. A value lower than or equal to `0` or
      * `null` or an empty string removes the attribute.

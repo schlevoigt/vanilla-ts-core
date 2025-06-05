@@ -104,6 +104,13 @@ export type HTMLElementWithDisabled =
     | HTMLOptGroupElement | HTMLOptionElement | HTMLSelectElement;
 
 /**
+ * HTML elements which can have a `autocomplete` attribute.
+ * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/autocomplete
+ */
+export type HTMLElementWithAutocomplete =
+    HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+
+/**
  * HTML input types (attribute `type`).
  */
 export type HTMLInputTypes = "button" | "checkbox" | "color" | "date" | "datetime-local" | "email"
