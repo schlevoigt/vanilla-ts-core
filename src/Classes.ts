@@ -980,8 +980,8 @@ export abstract class AElementComponent<T extends (HTMLElementWithChildren | HTM
     }
 }
 
-/** Augment class definition with the DOM attributes introduced by `mixinDOMAttributes()`. */
-export interface AElementComponent<T extends (HTMLElementWithChildren | HTMLElementVoid), EventMap extends EventMapVoid = HTMLElementEventMap> extends AGlobalDOMAttributes<T, EventMap> { }
+// Augment class definition with the DOM attributes introduced by `mixinDOMAttributes()`.
+export interface AElementComponent<T extends (HTMLElementWithChildren | HTMLElementVoid), EventMap extends EventMapVoid = HTMLElementEventMap> extends AGlobalDOMAttributes<T, EventMap> { } // eslint-disable-line jsdoc/require-jsdoc
 
 /**
  * Abstract base implementation of a component, *that does not allow* adding child components.
@@ -1497,8 +1497,8 @@ export abstract class AElementComponentWithChildren<T extends HTMLElementWithChi
     }
 }
 
-/** Augment class definition with `IChildren/AChildren` (see `static`). */
-export interface AElementComponentWithChildren<T extends HTMLElementWithChildren, EventMap extends EventMapVoid = HTMLElementEventMap> extends AChildren<T, EventMap> { }
+// Augment class definition with `IChildren/AChildren` (see `static`).
+export interface AElementComponentWithChildren<T extends HTMLElementWithChildren, EventMap extends EventMapVoid = HTMLElementEventMap> extends AChildren<T, EventMap> { } // eslint-disable-line jsdoc/require-jsdoc
 
 /**
  * Abstract base class for creating components that manage their own component tree/user interface
