@@ -654,8 +654,8 @@ export interface INodeComponent<T extends Node, EventMap extends EventMapVoid = 
     contains(component: INodeComponent<Node>): boolean;
 
     /**
-     * Returns `true`, if the node is connected to a DOM document object, otherwise `false`.
-     * Equivalent to the property `DOM.isConnected`.
+     * Returns `true`, if the component/node is connected to a DOM document object, otherwise
+     * `false`. Equivalent to the property `DOM.isConnected`.
      * @see https://developer.mozilla.org/en-US/docs/Web/API/Node/isConnected
      */
     readonly Connected: boolean;
@@ -1099,13 +1099,15 @@ export interface IElementVoidComponent<T extends HTMLElementVoid, EventMap exten
  */
 export interface IElementWithChildrenComponent<T extends HTMLElementWithChildren, EventMap extends EventMapVoid = HTMLElementEventMap> extends IElementComponent<T, EventMap>, IChildren {
     /**
-     * Set phrasing content of the component. This is a pure convenience setter which allows to add
-     * phrasing content in an easy way without having to resort to `append()`. This setter is
-     * primarly intended to be used with components like `Span`, `P` or similar.
+     * Set phrasing content of the component. This is a pure convenience setter which allows to
+     * add/replace phrasing content in an easy way without having to resort to `clear()` +
+     * `append()`. This setter is primarly intended to be used with components like `Span`, `P` or
+     * similar.
      *
      * __Notes:__
-     * - Setting phrasing content must remove _and dispose of (!)_ all current children of the
-     *   component and append the new phrasing content.
+     * - __Setting phrasing content must remove _and dispose of (!)_ all current children of the
+     *   component and append the new phrasing content.__
+     * - __Setting phrasing content with `Phrase` is therefore always a destroying operation!__
      * - A getter must not be implemented because the type of `Phrase` is `Phrase | Phrase[]`, but
      *   some components also allow adding flow content (e.g. `<div>`) and in such cases
      *   `Phrase | Phrase[]` would not fit as a return type. _Currently all implementing classes
@@ -1124,6 +1126,10 @@ export interface IElementWithChildrenComponent<T extends HTMLElementWithChildren
      * import { Em, Span, Text } from "@vanilla-ts/dom";
      *
      * const span = new Span();
+     *
+     * // ANY CONTENT SET WITH `Phrase` BEFORE WILL BE DISPOSED OF BY ALL OF THE FOLLOWING
+     * // REASSIGNMENTS OF `Phrase`!!!
+     *
      * // This only sets `textContent` to 'Hello World!'.
      * span.Phrase = "Hello world!";
      * // This replaces all children/`textContent` with an instance of an `Em` component.
@@ -1138,13 +1144,25 @@ export interface IElementWithChildrenComponent<T extends HTMLElementWithChildren
     get Phrase(): never; // eslint-disable-line jsdoc/require-jsdoc
 
     /**
+     * This is the same as `Phrase` except that it _does not destroy_ phrasing content that is
+     * already contained in the component. An implementation _must first remove all contained
+     * components without further touching them_ before adding new components so users of `Rephrase`
+     * must therefore manage/clear/dispose of the removed components themselves!
+     * @see {@link Phrase}
+     */
+    set Rephrase(phrase: Phrase | Phrase[]);
+    get Rephrase(): never; // eslint-disable-line jsdoc/require-jsdoc
+
+    /**
      * Set phrasing content of the component. This is a pure convenience function which allows to
-     * add phrasing content in an easy way without having to resort to `append()`. This function is
-     * primarly intended to be used with components like `Span`, `P` or similar.
+     * add/replace phrasing content in an easy way without having to resort to `clear()` +
+     * `append()`. This function is primarly intended to be used with components like `Span`, `P` or
+     * similar.
      *
      * __Notes:__
-     * - Setting phrasing content must remove _and dispose of(!)_ all current children of the
-     *   component and append the new phrasing content.
+     * - __Setting phrasing content must remove _and dispose of(!)_ all current children of the
+     *   component and append the new phrasing content.__
+     * - __Setting phrasing content with `Phrase` is therefore always a destroying operation!__
      * - If the length of `phrase` is greater than `1` then for any element of `phrase` that is of
      *   type `string`, an instance of a class that implements `INodeComponent<Text>` must be
      *   created with this string, so even pure text elements of `Children` are 'real' components.
@@ -1162,6 +1180,10 @@ export interface IElementWithChildrenComponent<T extends HTMLElementWithChildren
      * // The following 3 code lines all do not not create a `INodeComponent<Text>` but instead set
      * // `textContent` to 'Hello World!'.
      * const span = new Span("Hello world!");
+     *
+     * // ANY CONTENT SET WITH `phrase()` BEFORE WILL BE DISPOSED OF BY ALL OF THE FOLLOWING
+     * // CALLS OF `phrase()`!!!
+     *
      * const span = new Span().phrase("Hello world!");
      * // The initial `textContent` 'Foo' is replaced with 'Hello World!' (also `textContent`).
      * const span = new Span("Foo").phrase("Hello world!");
@@ -1176,6 +1198,15 @@ export interface IElementWithChildrenComponent<T extends HTMLElementWithChildren
      * ```
      */
     phrase(...phrase: Phrase[]): this;
+
+    /**
+     * This is the same as `phrase()` except that it _does not destroy_ phrasing content that is
+     * already contained in the component. An implementation _must first remove all contained
+     * components without further touching them_ before adding new components so users of `Rephrase`
+     * must therefore manage/clear/dispose of the removed components themselves!
+     * @see {@link Phrase}
+     */
+    rephrase(...phrase: Phrase[]): this;
 }
 
 /**

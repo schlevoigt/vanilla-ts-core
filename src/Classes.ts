@@ -1459,7 +1459,7 @@ export abstract class AElementComponentWithChildren<T extends HTMLElementWithChi
     }
 
     /** @inheritdoc */
-    get Phrase(): never {
+    public get Phrase(): never {
         throw new Error("'Phrase' is a writeonly property.");
     }
     /** @inheritdoc */
@@ -1476,6 +1476,22 @@ export abstract class AElementComponentWithChildren<T extends HTMLElementWithChi
             ? this._dom.textContent = phrase[0]
             : this.append(...phrase.map(e => typeof e === "string" ? new AElementComponentWithChildren.#DOMTextNode_(e) : e));
         return this;
+    }
+
+    /** @inheritdoc */
+    public get Rephrase(): never {
+        throw new Error("'Rephrase' is a writeonly property.");
+    }
+    /** @inheritdoc */
+    public set Rephrase(phrase: Phrase | Phrase[]) {
+        Array.isArray(phrase)
+            ? this.rephrase(...phrase)
+            : this.rephrase(phrase);
+    }
+
+    /** @inheritdoc */
+    public rephrase(...phrase: Phrase[]): this {
+        return this.remove().phrase(...phrase);
     }
 
     /**
