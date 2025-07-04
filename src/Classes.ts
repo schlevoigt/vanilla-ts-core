@@ -15,7 +15,8 @@ import {
     IGlobalDOMAttributes,
     IIsElementComponent,
     INodeComponent,
-    Phrase
+    Phrase,
+    Phrases
 } from "./Interfaces.js";
 import {
     AnyObject,
@@ -1463,14 +1464,14 @@ export abstract class AElementComponentWithChildren<T extends HTMLElementWithChi
         throw new Error("'Phrase' is a writeonly property.");
     }
     /** @inheritdoc */
-    public set Phrase(phrase: Phrase | Phrase[]) {
+    public set Phrase(phrase: Phrase | Phrases) {
         Array.isArray(phrase)
             ? this.phrase(...phrase)
             : this.phrase(phrase);
     }
 
     /** @inheritdoc */
-    public phrase(...phrase: Phrase[]): this {
+    public phrase(...phrase: Phrases): this {
         this.clear();
         phrase.length === 1 && typeof phrase[0] === "string"
             ? this._dom.textContent = phrase[0]
@@ -1483,14 +1484,14 @@ export abstract class AElementComponentWithChildren<T extends HTMLElementWithChi
         throw new Error("'Rephrase' is a writeonly property.");
     }
     /** @inheritdoc */
-    public set Rephrase(phrase: Phrase | Phrase[]) {
+    public set Rephrase(phrase: Phrase | Phrases) {
         Array.isArray(phrase)
             ? this.rephrase(...phrase)
             : this.rephrase(phrase);
     }
 
     /** @inheritdoc */
-    public rephrase(...phrase: Phrase[]): this {
+    public rephrase(...phrase: Phrases): this {
         return this.remove().phrase(...phrase);
     }
 

@@ -1108,9 +1108,9 @@ export interface IElementWithChildrenComponent<T extends HTMLElementWithChildren
      * - __Setting phrasing content must remove _and dispose of (!)_ all current children of the
      *   component and append the new phrasing content.__
      * - __Setting phrasing content with `Phrase` is therefore always a destroying operation!__
-     * - A getter must not be implemented because the type of `Phrase` is `Phrase | Phrase[]`, but
+     * - A getter must not be implemented because the type of `Phrase` is `Phrase | Phrases`, but
      *   some components also allow adding flow content (e.g. `<div>`) and in such cases
-     *   `Phrase | Phrase[]` would not fit as a return type. _Currently all implementing classes
+     *   `Phrase | Phrases` would not fit as a return type. _Currently all implementing classes
      *   throw an error if `Phrase` is accessed as a getter!_
      * - If the length of `phrase` is greater than `1` then for any element of `phrase` that is of
      *   type `string`, an instance of a class that implements `INodeComponent<Text>` must be
@@ -1140,7 +1140,7 @@ export interface IElementWithChildrenComponent<T extends HTMLElementWithChildren
      * span.Phrase = new Text("Hello world!");
      * ```
      */
-    set Phrase(phrase: Phrase | Phrase[]);
+    set Phrase(phrase: Phrase | Phrases);
     get Phrase(): never; // eslint-disable-line jsdoc/require-jsdoc
 
     /**
@@ -1150,7 +1150,7 @@ export interface IElementWithChildrenComponent<T extends HTMLElementWithChildren
      * must therefore manage/clear/dispose of the removed components themselves!
      * @see {@link Phrase}
      */
-    set Rephrase(phrase: Phrase | Phrase[]);
+    set Rephrase(phrase: Phrase | Phrases);
     get Rephrase(): never; // eslint-disable-line jsdoc/require-jsdoc
 
     /**
@@ -1197,7 +1197,7 @@ export interface IElementWithChildrenComponent<T extends HTMLElementWithChildren
      * const span = new Span("Foo").phrase("Hello ", new Em("world"), "!");
      * ```
      */
-    phrase(...phrase: Phrase[]): this;
+    phrase(...phrase: Phrases): this;
 
     /**
      * This is the same as `phrase()` except that it _does not destroy_ phrasing content that is
@@ -1206,7 +1206,7 @@ export interface IElementWithChildrenComponent<T extends HTMLElementWithChildren
      * must therefore manage/clear/dispose of the removed components themselves!
      * @see {@link Phrase}
      */
-    rephrase(...phrase: Phrase[]): this;
+    rephrase(...phrase: Phrases): this;
 }
 
 /**
